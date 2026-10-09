@@ -1,0 +1,2 @@
+# Copy to .dev.vars for local dev. In production: `npx wrangler secret put PEPPER`
+PEPPER=change-me-to-a-long-random-string

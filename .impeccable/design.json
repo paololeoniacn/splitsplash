@@ -1,0 +1,814 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T10:11:31+00:00",
+  "title": "Design System: SplitSplash",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Security Paper",
+        "canonical": "#f2f4f0",
+        "darkValue": "#0c1512",
+        "purpose": "Page ground; translucent sticky header backing.",
+        "tonalRamp": [
+          "#0a0c09",
+          "#242623",
+          "#41433f",
+          "#60625e",
+          "#81837f",
+          "#a4a6a2",
+          "#c8cac6",
+          "#edefeb"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Note Stock",
+        "canonical": "#fafbf8",
+        "darkValue": "#13201b",
+        "purpose": "Cards, inputs, sheets, secondary buttons, printed notes.",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#252523",
+          "#414240",
+          "#61625f",
+          "#828380",
+          "#a4a5a3",
+          "#c8c9c7",
+          "#eeefec"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Vault Ink",
+        "canonical": "#10201b",
+        "darkValue": "#e6ece6",
+        "purpose": "Text, primary pills, focus outline, selection, active tab, selected chips.",
+        "tonalRamp": [
+          "#020e0a",
+          "#192924",
+          "#354641",
+          "#546660",
+          "#748781",
+          "#97aaa3",
+          "#bacfc7",
+          "#dff4ed"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Faded Intaglio",
+        "canonical": "#4a5a54",
+        "darkValue": "#a3b3ab",
+        "purpose": "Secondary text, hints, inactive tabs, microprint, icons.",
+        "tonalRamp": [
+          "#030e0a",
+          "#1a2923",
+          "#374640",
+          "#55655f",
+          "#768780",
+          "#98aaa3",
+          "#bccec7",
+          "#e1f4ec"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline Sage",
+        "canonical": "#d3dad1",
+        "darkValue": "#26362f",
+        "purpose": "1px rules, dividers, card and input rings.",
+        "tonalRamp": [
+          "#080d07",
+          "#222720",
+          "#3e443d",
+          "#5d635b",
+          "#7e847c",
+          "#a1a79f",
+          "#c5cbc3",
+          "#eaf1e8"
+        ]
+      },
+      "owe": {
+        "role": "secondary",
+        "displayName": "Seal Vermilion",
+        "canonical": "#b2361f",
+        "darkValue": "#ff8a70",
+        "purpose": "You owe, negative balances, errors, caret; seal ink for serial, wordmark dot, specimen overprint.",
+        "tonalRamp": [
+          "#1d0100",
+          "#480c03",
+          "#7b1502",
+          "#aa2e17",
+          "#d2543c",
+          "#fa795f",
+          "#ffb4a3",
+          "#fee9e4"
+        ]
+      },
+      "owe-wash": {
+        "role": "secondary",
+        "displayName": "Vermilion Wash",
+        "canonical": "#f8ddd5",
+        "darkValue": "#3a1d16",
+        "purpose": "Lead card when you owe, error alerts, danger hover.",
+        "tonalRamp": [
+          "#160603",
+          "#33201a",
+          "#513c36",
+          "#725b54",
+          "#947c75",
+          "#b89f97",
+          "#ddc3bb",
+          "#ffe9e3"
+        ]
+      },
+      "owed": {
+        "role": "secondary",
+        "displayName": "Treasury Green",
+        "canonical": "#1b6a4d",
+        "darkValue": "#6fd3a6",
+        "purpose": "Owes you, positive balances, reconcile hints, settled cancellation mark.",
+        "tonalRamp": [
+          "#000f08",
+          "#022d1e",
+          "#0b4e37",
+          "#247153",
+          "#499374",
+          "#6db796",
+          "#91dcba",
+          "#c4fee2"
+        ]
+      },
+      "owed-wash": {
+        "role": "secondary",
+        "displayName": "Green Wash",
+        "canonical": "#d3eadf",
+        "darkValue": "#12332a",
+        "purpose": "Lead card when owed or all settled.",
+        "tonalRamp": [
+          "#010f08",
+          "#172a22",
+          "#34473e",
+          "#52675d",
+          "#73887e",
+          "#95aba1",
+          "#b9cfc5",
+          "#def5ea"
+        ]
+      },
+      "on-wash": {
+        "role": "neutral",
+        "displayName": "Wash Ink",
+        "canonical": "#10201b",
+        "darkValue": "#10201b",
+        "purpose": "Text on any wash, fixed dark in both schemes.",
+        "tonalRamp": [
+          "#020e0a",
+          "#192924",
+          "#354641",
+          "#546660",
+          "#748781",
+          "#97aaa3",
+          "#bacfc7",
+          "#dff4ed"
+        ]
+      },
+      "saffron-deep": {
+        "role": "tertiary",
+        "displayName": "Saffron Deep",
+        "canonical": "#855600",
+        "darkValue": "#f2c14e",
+        "cssClass": ".ink-0",
+        "cssVar": "--ink-deep",
+        "purpose": "Tinted text in the member ink.",
+        "tonalRamp": [
+          "#130900",
+          "#352002",
+          "#5a3b09",
+          "#855600",
+          "#a87732",
+          "#cd9a56",
+          "#f3be7a",
+          "#feebd5"
+        ]
+      },
+      "saffron-wash": {
+        "role": "tertiary",
+        "displayName": "Saffron Wash",
+        "canonical": "#f6e6b4",
+        "darkValue": "#e9dcb0",
+        "cssClass": ".ink-0",
+        "cssVar": "--ink-wash",
+        "purpose": "Portrait disk and selected member-chip ground; stays light in dark mode.",
+        "tonalRamp": [
+          "#100b00",
+          "#2e2402",
+          "#4f4111",
+          "#6f6032",
+          "#908253",
+          "#b4a475",
+          "#d8c998",
+          "#feeebc"
+        ]
+      },
+      "saffron-line": {
+        "role": "tertiary",
+        "displayName": "Saffron Line",
+        "canonical": "#d39a12",
+        "darkValue": "#c8961c",
+        "cssClass": ".ink-0",
+        "cssVar": "--ink-line",
+        "purpose": "Rosette and guilloche strokes.",
+        "tonalRamp": [
+          "#110a00",
+          "#322201",
+          "#563d06",
+          "#7d5b0f",
+          "#a77908",
+          "#d39a11",
+          "#f9be4a",
+          "#feeccd"
+        ]
+      },
+      "carmine-deep": {
+        "role": "tertiary",
+        "displayName": "Carmine Rose Deep",
+        "canonical": "#9b2257",
+        "darkValue": "#f59bc1",
+        "cssClass": ".ink-1",
+        "cssVar": "--ink-deep",
+        "purpose": "Tinted text in the member ink.",
+        "tonalRamp": [
+          "#1d000a",
+          "#490123",
+          "#7a0640",
+          "#a42c5e",
+          "#cb517f",
+          "#f375a2",
+          "#feafc7",
+          "#fee8ee"
+        ]
+      },
+      "carmine-wash": {
+        "role": "tertiary",
+        "displayName": "Carmine Rose Wash",
+        "canonical": "#f5d3e1",
+        "darkValue": "#ecd0dc",
+        "cssClass": ".ink-1",
+        "cssVar": "--ink-wash",
+        "purpose": "Portrait disk and selected member-chip ground; stays light in dark mode.",
+        "tonalRamp": [
+          "#18040d",
+          "#351c27",
+          "#543945",
+          "#745864",
+          "#977885",
+          "#bb9ba8",
+          "#e0bfcc",
+          "#fee7f1"
+        ]
+      },
+      "carmine-line": {
+        "role": "tertiary",
+        "displayName": "Carmine Rose Line",
+        "canonical": "#c8457f",
+        "darkValue": "#c25387",
+        "cssClass": ".ink-1",
+        "cssVar": "--ink-line",
+        "purpose": "Rosette and guilloche strokes.",
+        "tonalRamp": [
+          "#1c000c",
+          "#480126",
+          "#780944",
+          "#a72463",
+          "#cf4b85",
+          "#f770a7",
+          "#fdafca",
+          "#fee8ef"
+        ]
+      },
+      "teal-deep": {
+        "role": "tertiary",
+        "displayName": "Teal Deep",
+        "canonical": "#0e6672",
+        "darkValue": "#7fd3df",
+        "cssClass": ".ink-2",
+        "cssVar": "--ink-deep",
+        "purpose": "Tinted text in the member ink.",
+        "tonalRamp": [
+          "#000e11",
+          "#032b30",
+          "#004b55",
+          "#1a6d79",
+          "#438f9c",
+          "#67b3bf",
+          "#8bd7e5",
+          "#cef7fe"
+        ]
+      },
+      "teal-wash": {
+        "role": "tertiary",
+        "displayName": "Teal Wash",
+        "canonical": "#cde8ec",
+        "darkValue": "#c9e1e4",
+        "cssClass": ".ink-2",
+        "cssVar": "--ink-wash",
+        "purpose": "Portrait disk and selected member-chip ground; stays light in dark mode.",
+        "tonalRamp": [
+          "#000e10",
+          "#13292c",
+          "#30474a",
+          "#4e666a",
+          "#6f888b",
+          "#91abae",
+          "#b4cfd3",
+          "#d9f4f8"
+        ]
+      },
+      "teal-line": {
+        "role": "tertiary",
+        "displayName": "Teal Line",
+        "canonical": "#2a93a3",
+        "darkValue": "#2f95a5",
+        "cssClass": ".ink-2",
+        "cssVar": "--ink-line",
+        "purpose": "Rosette and guilloche strokes.",
+        "tonalRamp": [
+          "#000e11",
+          "#012b31",
+          "#084b54",
+          "#146d7a",
+          "#2891a1",
+          "#53b5c6",
+          "#79daeb",
+          "#d0f7fe"
+        ]
+      },
+      "cobalt-deep": {
+        "role": "tertiary",
+        "displayName": "Cobalt Deep",
+        "canonical": "#2a4c9c",
+        "darkValue": "#9db7ff",
+        "cssClass": ".ink-3",
+        "cssVar": "--ink-deep",
+        "purpose": "Tinted text in the member ink.",
+        "tonalRamp": [
+          "#000133",
+          "#021866",
+          "#1b3b89",
+          "#395cae",
+          "#587fd4",
+          "#79a3fa",
+          "#b0c9fc",
+          "#e7effe"
+        ]
+      },
+      "cobalt-wash": {
+        "role": "tertiary",
+        "displayName": "Cobalt Wash",
+        "canonical": "#d4ddf4",
+        "darkValue": "#cfd8ee",
+        "cssClass": ".ink-3",
+        "cssVar": "--ink-wash",
+        "purpose": "Portrait disk and selected member-chip ground; stays light in dark mode.",
+        "tonalRamp": [
+          "#060a19",
+          "#1e2435",
+          "#3b4254",
+          "#596175",
+          "#7a8297",
+          "#9ca5ba",
+          "#c0c9df",
+          "#e8eefe"
+        ]
+      },
+      "cobalt-line": {
+        "role": "tertiary",
+        "displayName": "Cobalt Line",
+        "canonical": "#4a72cf",
+        "darkValue": "#5a7fd6",
+        "cssClass": ".ink-3",
+        "cssVar": "--ink-line",
+        "purpose": "Rosette and guilloche strokes.",
+        "tonalRamp": [
+          "#000134",
+          "#02146c",
+          "#183890",
+          "#355bb5",
+          "#547ddc",
+          "#79a2fc",
+          "#b0c9fc",
+          "#e7effe"
+        ]
+      },
+      "umber-deep": {
+        "role": "tertiary",
+        "displayName": "Umber Deep",
+        "canonical": "#774628",
+        "darkValue": "#e2a97f",
+        "cssClass": ".ink-4",
+        "cssVar": "--ink-deep",
+        "purpose": "Tinted text in the member ink.",
+        "tonalRamp": [
+          "#170600",
+          "#3e1901",
+          "#633415",
+          "#855335",
+          "#a97455",
+          "#ce9777",
+          "#f4bb9a",
+          "#feeadf"
+        ]
+      },
+      "umber-wash": {
+        "role": "tertiary",
+        "displayName": "Umber Wash",
+        "canonical": "#ecdacb",
+        "darkValue": "#e4d3c4",
+        "cssClass": ".ink-4",
+        "cssVar": "--ink-wash",
+        "purpose": "Portrait disk and selected member-chip ground; stays light in dark mode.",
+        "tonalRamp": [
+          "#140801",
+          "#2f2217",
+          "#4d3f33",
+          "#6d5e51",
+          "#8f7f71",
+          "#b3a293",
+          "#d7c6b7",
+          "#fdebdc"
+        ]
+      },
+      "umber-line": {
+        "role": "tertiary",
+        "displayName": "Umber Line",
+        "canonical": "#a86f48",
+        "darkValue": "#ad7650",
+        "cssClass": ".ink-4",
+        "cssVar": "--ink-line",
+        "purpose": "Rosette and guilloche strokes.",
+        "tonalRamp": [
+          "#160700",
+          "#3c1b01",
+          "#663205",
+          "#88522b",
+          "#ac734c",
+          "#d2966e",
+          "#f8ba91",
+          "#feeadd"
+        ]
+      },
+      "violet-deep": {
+        "role": "tertiary",
+        "displayName": "Violet Deep",
+        "canonical": "#66389a",
+        "darkValue": "#c9a6f5",
+        "cssClass": ".ink-5",
+        "cssVar": "--ink-deep",
+        "purpose": "Tinted text in the member ink.",
+        "tonalRamp": [
+          "#120026",
+          "#320558",
+          "#532284",
+          "#7345a8",
+          "#9468ce",
+          "#b88bf5",
+          "#d4bbfc",
+          "#f2ebfe"
+        ]
+      },
+      "violet-wash": {
+        "role": "tertiary",
+        "displayName": "Violet Wash",
+        "canonical": "#e4d7f2",
+        "darkValue": "#dcd0ea",
+        "cssClass": ".ink-5",
+        "cssVar": "--ink-wash",
+        "purpose": "Portrait disk and selected member-chip ground; stays light in dark mode.",
+        "tonalRamp": [
+          "#100618",
+          "#2a2034",
+          "#473d52",
+          "#675c73",
+          "#887d95",
+          "#ab9fb9",
+          "#d0c3dd",
+          "#f4eaff"
+        ]
+      },
+      "violet-line": {
+        "role": "tertiary",
+        "displayName": "Violet Line",
+        "canonical": "#8e5fc6",
+        "darkValue": "#9467cc",
+        "cssClass": ".ink-5",
+        "cssVar": "--ink-line",
+        "purpose": "Rosette and guilloche strokes.",
+        "tonalRamp": [
+          "#120124",
+          "#330458",
+          "#542184",
+          "#7444a9",
+          "#9667cf",
+          "#b98af5",
+          "#d5bafd",
+          "#f2eafe"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing headline only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Room name; form pages use a fixed 2rem at the same weight."
+      },
+      "amount-hero": {
+        "displayName": "Amount Entry",
+        "purpose": "The expense sheet amount field, on a 2px underline."
+      },
+      "amount-total": {
+        "displayName": "Room Total",
+        "purpose": "Right-aligned room total beside the name."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings and sheet titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Rows, ledgers, prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, legends, chips, small buttons."
+      },
+      "microprint": {
+        "displayName": "Microprint",
+        "purpose": "Uppercase mono label attached to a value, and ledger date groups."
+      },
+      "serial": {
+        "displayName": "Serial",
+        "purpose": "Passphrase set like a banknote serial; mints by rolling characters."
+      }
+    },
+    "shadows": [
+      {
+        "name": "pill-press",
+        "value": "0 6px 18px -8px rgb(16 32 27 / 0.6)",
+        "purpose": "Primary pill buttons."
+      },
+      {
+        "name": "pill-float",
+        "value": "0 14px 30px -10px rgb(16 32 27 / 0.65)",
+        "purpose": "Fixed bottom-centre add-expense button."
+      },
+      {
+        "name": "toast",
+        "value": "0 10px 30px -10px rgb(0 0 0 / 0.5)",
+        "purpose": "Toast pill."
+      },
+      {
+        "name": "note-specimen",
+        "value": "0 30px 60px -30px rgb(16 32 27 / 0.45), 0 2px 6px rgb(16 32 27 / 0.08)",
+        "purpose": "Landing specimen note lifted off the page."
+      },
+      {
+        "name": "note-invite",
+        "value": "0 24px 50px -28px rgb(16 32 27 / 0.5), 0 1px 4px rgb(16 32 27 / 0.08)",
+        "purpose": "Invite note carrying serial and QR."
+      },
+      {
+        "name": "sheet",
+        "value": "0 -12px 40px -12px rgb(0 0 0 / 0.25)",
+        "purpose": "Bottom sheet dialog."
+      },
+      {
+        "name": "segment-thumb",
+        "value": "0 1px 4px rgb(0 0 0 / 0.12)",
+        "purpose": "Selected segment in a segmented control."
+      },
+      {
+        "name": "backdrop",
+        "value": "rgb(8 16 13 / 0.45)",
+        "purpose": "Sheet backdrop colour (fades in 240ms)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Default easing for every entrance and the specimen tilt."
+      },
+      {
+        "name": "rise",
+        "value": "420ms ease-out-expo; opacity 0→1, translateY 6px→0",
+        "purpose": "Page main and toast entrance."
+      },
+      {
+        "name": "sheet-up",
+        "value": "380ms ease-out-expo; translateY 100%→0",
+        "purpose": "Dialog sheet opening."
+      },
+      {
+        "name": "fade-in",
+        "value": "240ms ease-out",
+        "purpose": "Sheet backdrop."
+      },
+      {
+        "name": "stamp-in",
+        "value": "620ms ease-out-expo; rotate -14°→-9°, scale 1.8→1, blur 6px→0",
+        "purpose": "Settled cancellation mark."
+      },
+      {
+        "name": "rosette-draw",
+        "value": "900ms ease-out-expo, 35ms stagger per ring; stroke-dashoffset 1→0",
+        "purpose": "Rosette redraw on settle and on the landing specimen."
+      },
+      {
+        "name": "serial-mint",
+        "value": "26 frames × 38ms (~1s)",
+        "purpose": "Passphrase characters rolling into place."
+      },
+      {
+        "name": "state",
+        "value": "200ms; active scale 0.98",
+        "purpose": "Button colour, shadow and press feedback."
+      },
+      {
+        "name": "specimen-tilt",
+        "value": "700ms ease-out-expo; rotate -1.5°→0 on hover",
+        "purpose": "Landing specimen note."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all animation and transition durations 1ms, 1 iteration",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "Sheet becomes a centred card with four rounded corners; header gutters widen."
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "Landing splits into copy and specimen columns."
+      }
+    ],
+    "containers": [
+      {
+        "name": "form",
+        "value": "32rem"
+      },
+      {
+        "name": "sheet",
+        "value": "34rem"
+      },
+      {
+        "name": "room",
+        "value": "48rem"
+      },
+      {
+        "name": "landing",
+        "value": "72rem"
+      }
+    ],
+    "focus": {
+      "value": "outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px",
+      "purpose": "Global :focus-visible."
+    },
+    "numerals": {
+      "value": "font-variant-numeric: lining-nums (no tnum)",
+      "purpose": "The .num class on every amount."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink pill for the one main action per view; lg size is the fixed add-expense button.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M12 5v14\"/></svg>Aggiungi spesa</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:56px; padding:0 24px; border:0; border-radius:9999px; background:var(--ink, #10201b); color:var(--paper, #f2f4f0); font:600 16px/1 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; box-shadow:0 14px 30px -10px rgb(16 32 27 / 0.65); cursor:pointer; transition:background-color 200ms, box-shadow 200ms, transform 200ms; } .ds-btn-primary:hover { background:color-mix(in srgb, var(--ink, #10201b) 90%, transparent); } .ds-btn-primary:active { transform:scale(0.98); } .ds-btn-primary:focus-visible { outline:2px solid var(--ink, #10201b); outline-offset:3px; } .ds-btn-primary:disabled { opacity:0.45; cursor:not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Note-stock pill with a hairline ring for the alternate action (Enter passphrase, Mark paid on non-lead cards).",
+      "html": "<button class=\"ds-btn-secondary\">Segna pagato</button>",
+      "css": ".ds-btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:44px; padding:0 16px; border:0; border-radius:9999px; background:var(--raised, #fafbf8); color:var(--ink, #10201b); box-shadow:inset 0 0 0 1px var(--rule, #d3dad1); font:600 15px/1 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; cursor:pointer; transition:box-shadow 200ms, transform 200ms; } .ds-btn-secondary:hover { box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ink, #10201b) 40%, transparent); } .ds-btn-secondary:active { transform:scale(0.98); } .ds-btn-secondary:focus-visible { outline:2px solid var(--ink, #10201b); outline-offset:3px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "Labelled field on note stock; ring thickens to ink on focus, turns vermilion on error.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Titolo</span><input class=\"ds-input\" placeholder=\"Cena, taxi, spesa…\"><span class=\"ds-field-hint\">Una parola basta.</span></label>",
+      "css": ".ds-field { display:grid; gap:6px; font-family:'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; color:var(--ink, #10201b); } .ds-field-label { font-size:14px; font-weight:600; } .ds-field-hint { font-size:14px; color:var(--ink-2, #4a5a54); } .ds-input { height:48px; padding:0 14px; border:0; border-radius:12px; background:var(--raised, #fafbf8); color:var(--ink, #10201b); font:400 16px 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; box-shadow:inset 0 0 0 1px var(--rule, #d3dad1); outline:none; caret-color:var(--owe, #b2361f); transition:box-shadow 200ms; } .ds-input::placeholder { color:color-mix(in srgb, var(--ink-2, #4a5a54) 70%, transparent); } .ds-input:focus { box-shadow:inset 0 0 0 2px var(--ink, #10201b); } .ds-input[aria-invalid=true] { box-shadow:inset 0 0 0 1px var(--owe, #b2361f); }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "refersTo": "chip-category",
+      "description": "Radio pill with line icon; selected inverts to solid ink.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip ds-chip-on\" aria-pressed=\"true\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7\"/></svg>Cibo</button><button class=\"ds-chip\">Trasporti</button><button class=\"ds-chip\">Alloggio</button></div>",
+      "css": ".ds-chips { display:flex; gap:8px; } .ds-chip { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border:0; border-radius:9999px; background:transparent; color:var(--ink, #10201b); box-shadow:inset 0 0 0 1px var(--rule, #d3dad1); font:600 14px/1.2 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; cursor:pointer; transition:box-shadow 200ms, background-color 200ms; } .ds-chip:hover { box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ink, #10201b) 40%, transparent); } .ds-chip:focus-visible { outline:2px solid var(--ink, #10201b); outline-offset:3px; } .ds-chip-on, .ds-chip-on:hover { background:var(--ink, #10201b); color:var(--paper, #f2f4f0); box-shadow:inset 0 0 0 1px var(--ink, #10201b); }"
+    },
+    {
+      "name": "Room Tabs",
+      "kind": "nav",
+      "description": "Sticky text tabs with hairline base and ink underline on the active tab.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"ds-tab ds-tab-on\" href=\"#\">Spese</a><a class=\"ds-tab\" href=\"#\">Saldi</a><a class=\"ds-tab\" href=\"#\">Attività</a></nav>",
+      "css": ".ds-tabs { display:flex; gap:24px; padding:0 20px; border-bottom:1px solid var(--rule, #d3dad1); background:color-mix(in srgb, var(--paper, #f2f4f0) 92%, transparent); backdrop-filter:blur(12px); font-family:'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; } .ds-tab { position:relative; padding:12px 0; font-size:15px; font-weight:600; color:var(--ink-2, #4a5a54); text-decoration:none; transition:color 200ms; } .ds-tab:hover { color:var(--ink, #10201b); } .ds-tab:focus-visible { outline:2px solid var(--ink, #10201b); outline-offset:3px; border-radius:6px; } .ds-tab-on { color:var(--ink, #10201b); } .ds-tab-on::after { content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; border-radius:9999px; background:var(--ink, #10201b); }"
+    },
+    {
+      "name": "Portrait",
+      "kind": "custom",
+      "description": "Member identity plate: animal emoji on a light wash disk inside a rosette in the member line ink. Swap --ink-line/--ink-wash per denomination.",
+      "html": "<div class=\"ds-portraits\"><figure class=\"ds-portrait\" style=\"--ink-line:#d39a12;--ink-wash:#f6e6b4\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M91.0 50.0L95.5 53.0L97.1 56.2L94.7 58.9L89.6 60.6L84.5 61.7L81.9 63.2L82.6 66.1L85.5 70.5L87.9 75.3L87.7 78.9L84.3 80.1L79.0 79.0L74.0 77.4L71.0 77.4L70.2 80.3L70.5 85.5L70.2 90.9L68.2 93.9L64.7 93.2L60.6 89.6L57.1 85.7L54.5 84.2L52.4 86.3L50.0 91.0L47.0 95.5L43.8 97.1L41.1 94.7L39.4 89.6L38.3 84.5L36.8 81.9L33.9 82.6L29.5 85.5L24.7 87.9L21.1 87.7L19.9 84.3L21.0 79.0L22.6 74.0L22.6 71.0L19.7 70.2L14.5 70.5L9.1 70.2L6.1 68.2L6.8 64.7L10.4 60.6L14.3 57.1L15.8 54.5L13.7 52.4L9.0 50.0L4.5 47.0L2.9 43.8L5.3 41.1L10.4 39.4L15.5 38.3L18.1 36.8L17.4 33.9L14.5 29.5L12.1 24.7L12.3 21.1L15.7 19.9L21.0 21.0L26.0 22.6L29.0 22.6L29.8 19.7L29.5 14.5L29.8 9.1L31.8 6.1L35.3 6.8L39.4 10.4L42.9 14.3L45.5 15.8L47.6 13.7L50.0 9.0L53.0 4.5L56.2 2.9L58.9 5.3L60.6 10.4L61.7 15.5L63.2 18.1L66.1 17.4L70.5 14.5L75.3 12.1L78.9 12.3L80.1 15.7L79.0 21.0L77.4 26.0L77.4 29.0L80.3 29.8L85.5 29.5L90.9 29.8L93.9 31.8L93.2 35.3L89.6 39.4L85.7 42.9L84.2 45.5L86.3 47.6L91.0 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M96.6 50.0L97.2 53.1L93.9 55.8L88.6 57.7L84.2 59.2L82.9 61.2L84.9 64.4L88.3 68.9L90.4 73.3L89.3 76.3L85.1 76.9L79.6 75.9L75.0 75.0L72.9 76.1L73.0 79.9L73.7 85.5L73.3 90.4L70.9 92.4L66.9 90.9L62.6 87.2L59.2 84.2L56.8 84.1L54.9 87.4L52.8 92.6L50.0 96.6L46.9 97.2L44.2 93.9L42.3 88.6L40.8 84.2L38.8 82.9L35.6 84.9L31.1 88.3L26.7 90.4L23.7 89.3L23.1 85.1L24.1 79.6L25.0 75.0L23.9 72.9L20.1 73.0L14.5 73.7L9.6 73.3L7.6 70.9L9.1 66.9L12.8 62.6L15.8 59.2L15.9 56.8L12.6 54.9L7.4 52.8L3.4 50.0L2.8 46.9L6.1 44.2L11.4 42.3L15.8 40.8L17.1 38.8L15.1 35.6L11.7 31.1L9.6 26.7L10.7 23.7L14.9 23.1L20.4 24.1L25.0 25.0L27.1 23.9L27.0 20.1L26.3 14.5L26.7 9.6L29.1 7.6L33.1 9.1L37.4 12.8L40.8 15.8L43.2 15.9L45.1 12.6L47.2 7.4L50.0 3.4L53.1 2.8L55.8 6.1L57.7 11.4L59.2 15.8L61.2 17.1L64.4 15.1L68.9 11.7L73.3 9.6L76.3 10.7L76.9 14.9L75.9 20.4L75.0 25.0L76.1 27.1L79.9 27.0L85.5 26.3L90.4 26.7L92.4 29.1L90.9 33.1L87.2 37.4L84.2 40.8L84.1 43.2L87.4 45.1L92.6 47.2L96.6 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M96.6 50.0L92.6 52.8L87.4 54.9L84.1 56.8L84.2 59.2L87.2 62.6L90.9 66.9L92.4 70.9L90.4 73.3L85.5 73.7L79.9 73.0L76.1 72.9L75.0 75.0L75.9 79.6L76.9 85.1L76.3 89.3L73.3 90.4L68.9 88.3L64.4 84.9L61.2 82.9L59.2 84.2L57.7 88.6L55.8 93.9L53.1 97.2L50.0 96.6L47.2 92.6L45.1 87.4L43.2 84.1L40.8 84.2L37.4 87.2L33.1 90.9L29.1 92.4L26.7 90.4L26.3 85.5L27.0 79.9L27.1 76.1L25.0 75.0L20.4 75.9L14.9 76.9L10.7 76.3L9.6 73.3L11.7 68.9L15.1 64.4L17.1 61.2L15.8 59.2L11.4 57.7L6.1 55.8L2.8 53.1L3.4 50.0L7.4 47.2L12.6 45.1L15.9 43.2L15.8 40.8L12.8 37.4L9.1 33.1L7.6 29.1L9.6 26.7L14.5 26.3L20.1 27.0L23.9 27.1L25.0 25.0L24.1 20.4L23.1 14.9L23.7 10.7L26.7 9.6L31.1 11.7L35.6 15.1L38.8 17.1L40.8 15.8L42.3 11.4L44.2 6.1L46.9 2.8L50.0 3.4L52.8 7.4L54.9 12.6L56.8 15.9L59.2 15.8L62.6 12.8L66.9 9.1L70.9 7.6L73.3 9.6L73.7 14.5L73.0 20.1L72.9 23.9L75.0 25.0L79.6 24.1L85.1 23.1L89.3 23.7L90.4 26.7L88.3 31.1L84.9 35.6L82.9 38.8L84.2 40.8L88.6 42.3L93.9 44.2L97.2 46.9L96.6 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M91.0 50.0L86.3 52.4L84.2 54.5L85.7 57.1L89.6 60.6L93.2 64.7L93.9 68.2L90.9 70.2L85.5 70.5L80.3 70.2L77.4 71.0L77.4 74.0L79.0 79.0L80.1 84.3L78.9 87.7L75.3 87.9L70.5 85.5L66.1 82.6L63.2 81.9L61.7 84.5L60.6 89.6L58.9 94.7L56.2 97.1L53.0 95.5L50.0 91.0L47.6 86.3L45.5 84.2L42.9 85.7L39.4 89.6L35.3 93.2L31.8 93.9L29.8 90.9L29.5 85.5L29.8 80.3L29.0 77.4L26.0 77.4L21.0 79.0L15.7 80.1L12.3 78.9L12.1 75.3L14.5 70.5L17.4 66.1L18.1 63.2L15.5 61.7L10.4 60.6L5.3 58.9L2.9 56.2L4.5 53.0L9.0 50.0L13.7 47.6L15.8 45.5L14.3 42.9L10.4 39.4L6.8 35.3L6.1 31.8L9.1 29.8L14.5 29.5L19.7 29.8L22.6 29.0L22.6 26.0L21.0 21.0L19.9 15.7L21.1 12.3L24.7 12.1L29.5 14.5L33.9 17.4L36.8 18.1L38.3 15.5L39.4 10.4L41.1 5.3L43.8 2.9L47.0 4.5L50.0 9.0L52.4 13.7L54.5 15.8L57.1 14.3L60.6 10.4L64.7 6.8L68.2 6.1L70.2 9.1L70.5 14.5L70.2 19.7L71.0 22.6L74.0 22.6L79.0 21.0L84.3 19.9L87.7 21.1L87.9 24.7L85.5 29.5L82.6 33.9L81.9 36.8L84.5 38.3L89.6 39.4L94.7 41.1L97.1 43.8L95.5 47.0L91.0 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M85.4 50.0L84.6 52.3L87.4 54.9L91.9 58.3L95.0 62.1L94.8 65.2L90.9 66.9L85.3 67.4L80.6 67.7L78.9 69.3L79.9 73.0L82.1 78.1L83.0 83.0L81.2 85.5L76.9 85.1L71.8 82.7L67.7 80.6L65.4 81.1L64.4 84.9L63.7 90.4L62.1 95.0L59.2 96.4L55.8 93.9L52.6 89.2L50.0 85.4L47.7 84.6L45.1 87.4L41.7 91.9L37.9 95.0L34.8 94.8L33.1 90.9L32.6 85.3L32.3 80.6L30.7 78.9L27.0 79.9L21.9 82.1L17.0 83.0L14.5 81.2L14.9 76.9L17.3 71.8L19.4 67.7L18.9 65.4L15.1 64.4L9.6 63.7L5.0 62.1L3.6 59.2L6.1 55.8L10.8 52.6L14.6 50.0L15.4 47.7L12.6 45.1L8.1 41.7L5.0 37.9L5.2 34.8L9.1 33.1L14.7 32.6L19.4 32.3L21.1 30.7L20.1 27.0L17.9 21.9L17.0 17.0L18.8 14.5L23.1 14.9L28.2 17.3L32.3 19.4L34.6 18.9L35.6 15.1L36.3 9.6L37.9 5.0L40.8 3.6L44.2 6.1L47.4 10.8L50.0 14.6L52.3 15.4L54.9 12.6L58.3 8.1L62.1 5.0L65.2 5.2L66.9 9.1L67.4 14.7L67.7 19.4L69.3 21.1L73.0 20.1L78.1 17.9L83.0 17.0L85.5 18.8L85.1 23.1L82.7 28.2L80.6 32.3L81.1 34.6L84.9 35.6L90.4 36.3L95.0 37.9L96.4 40.8L93.9 44.2L89.2 47.4L85.4 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M85.4 50.0L89.2 52.6L93.9 55.8L96.4 59.2L95.0 62.1L90.4 63.7L84.9 64.4L81.1 65.4L80.6 67.7L82.7 71.8L85.1 76.9L85.5 81.2L83.0 83.0L78.1 82.1L73.0 79.9L69.3 78.9L67.7 80.6L67.4 85.3L66.9 90.9L65.2 94.8L62.1 95.0L58.3 91.9L54.9 87.4L52.3 84.6L50.0 85.4L47.4 89.2L44.2 93.9L40.8 96.4L37.9 95.0L36.3 90.4L35.6 84.9L34.6 81.1L32.3 80.6L28.2 82.7L23.1 85.1L18.8 85.5L17.0 83.0L17.9 78.1L20.1 73.0L21.1 69.3L19.4 67.7L14.7 67.4L9.1 66.9L5.2 65.2L5.0 62.1L8.1 58.3L12.6 54.9L15.4 52.3L14.6 50.0L10.8 47.4L6.1 44.2L3.6 40.8L5.0 37.9L9.6 36.3L15.1 35.6L18.9 34.6L19.4 32.3L17.3 28.2L14.9 23.1L14.5 18.8L17.0 17.0L21.9 17.9L27.0 20.1L30.7 21.1L32.3 19.4L32.6 14.7L33.1 9.1L34.8 5.2L37.9 5.0L41.7 8.1L45.1 12.6L47.7 15.4L50.0 14.6L52.6 10.8L55.8 6.1L59.2 3.6L62.1 5.0L63.7 9.6L64.4 15.1L65.4 18.9L67.7 19.4L71.8 17.3L76.9 14.9L81.2 14.5L83.0 17.0L82.1 21.9L79.9 27.0L78.9 30.7L80.6 32.3L85.3 32.6L90.9 33.1L94.8 34.8L95.0 37.9L91.9 41.7L87.4 45.1L84.6 47.7L85.4 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M79.0 50.0L81.9 52.1L78.8 53.8L75.5 55.1L78.0 57.5L80.3 60.3L76.8 61.1L73.3 61.5L75.1 64.5L76.6 67.8L73.0 67.7L69.5 67.1L70.5 70.5L71.1 74.1L67.7 73.0L64.4 71.6L64.5 75.1L64.2 78.7L61.1 76.8L58.4 74.6L57.5 78.0L56.2 81.4L53.8 78.8L51.7 75.9L50.0 79.0L47.9 81.9L46.2 78.8L44.9 75.5L42.5 78.0L39.7 80.3L38.9 76.8L38.5 73.3L35.5 75.1L32.2 76.6L32.3 73.0L32.9 69.5L29.5 70.5L25.9 71.1L27.0 67.7L28.4 64.4L24.9 64.5L21.3 64.2L23.2 61.1L25.4 58.4L22.0 57.5L18.6 56.2L21.2 53.8L24.1 51.7L21.0 50.0L18.1 47.9L21.2 46.2L24.5 44.9L22.0 42.5L19.7 39.7L23.2 38.9L26.7 38.5L24.9 35.5L23.4 32.2L27.0 32.3L30.5 32.9L29.5 29.5L28.9 25.9L32.3 27.0L35.6 28.4L35.5 24.9L35.8 21.3L38.9 23.2L41.6 25.4L42.5 22.0L43.8 18.6L46.2 21.2L48.3 24.1L50.0 21.0L52.1 18.1L53.8 21.2L55.1 24.5L57.5 22.0L60.3 19.7L61.1 23.2L61.5 26.7L64.5 24.9L67.8 23.4L67.7 27.0L67.1 30.5L70.5 29.5L74.1 28.9L73.0 32.3L71.6 35.6L75.1 35.5L78.7 35.8L76.8 38.9L74.6 41.6L78.0 42.5L81.4 43.8L78.8 46.2L75.9 48.3L79.0 50.0Z\" stroke-width=\"0.45\"/><path pathLength=\"1\" d=\"M81.6 50.0L77.4 51.8L76.2 53.4L79.9 56.0L80.5 58.2L76.0 58.8L74.4 60.1L77.4 63.5L77.4 65.8L72.9 65.3L70.9 66.1L72.9 70.1L72.3 72.3L68.1 70.7L66.1 70.9L66.9 75.4L65.8 77.4L62.2 74.7L60.1 74.4L59.8 78.9L58.2 80.5L55.4 77.0L53.4 76.2L52.0 80.4L50.0 81.6L48.2 77.4L46.6 76.2L44.0 79.9L41.8 80.5L41.2 76.0L39.9 74.4L36.5 77.4L34.2 77.4L34.7 72.9L33.9 70.9L29.9 72.9L27.7 72.3L29.3 68.1L29.1 66.1L24.6 66.9L22.6 65.8L25.3 62.2L25.6 60.1L21.1 59.8L19.5 58.2L23.0 55.4L23.8 53.4L19.6 52.0L18.4 50.0L22.6 48.2L23.8 46.6L20.1 44.0L19.5 41.8L24.0 41.2L25.6 39.9L22.6 36.5L22.6 34.2L27.1 34.7L29.1 33.9L27.1 29.9L27.7 27.7L31.9 29.3L33.9 29.1L33.1 24.6L34.2 22.6L37.8 25.3L39.9 25.6L40.2 21.1L41.8 19.5L44.6 23.0L46.6 23.8L48.0 19.6L50.0 18.4L51.8 22.6L53.4 23.8L56.0 20.1L58.2 19.5L58.8 24.0L60.1 25.6L63.5 22.6L65.8 22.6L65.3 27.1L66.1 29.1L70.1 27.1L72.3 27.7L70.7 31.9L70.9 33.9L75.4 33.1L77.4 34.2L74.7 37.8L74.4 39.9L78.9 40.2L80.5 41.8L77.0 44.6L76.2 46.6L80.4 48.0L81.6 50.0Z\" stroke-width=\"0.45\"/><path pathLength=\"1\" d=\"M76.4 50.0L77.4 51.8L81.3 54.1L79.9 56.0L75.5 56.8L76.0 58.8L79.2 62.1L77.4 63.5L72.9 63.2L72.9 65.3L75.1 69.2L72.9 70.1L68.7 68.7L68.1 70.7L69.2 75.1L66.9 75.4L63.2 72.9L62.2 74.7L62.1 79.2L59.8 78.9L56.8 75.5L55.4 77.0L54.1 81.3L52.0 80.4L50.0 76.4L48.2 77.4L45.9 81.3L44.0 79.9L43.2 75.5L41.2 76.0L37.9 79.2L36.5 77.4L36.8 72.9L34.7 72.9L30.8 75.1L29.9 72.9L31.3 68.7L29.3 68.1L24.9 69.2L24.6 66.9L27.1 63.2L25.3 62.2L20.8 62.1L21.1 59.8L24.5 56.8L23.0 55.4L18.7 54.1L19.6 52.0L23.6 50.0L22.6 48.2L18.7 45.9L20.1 44.0L24.5 43.2L24.0 41.2L20.8 37.9L22.6 36.5L27.1 36.8L27.1 34.7L24.9 30.8L27.1 29.9L31.3 31.3L31.9 29.3L30.8 24.9L33.1 24.6L36.8 27.1L37.8 25.3L37.9 20.8L40.2 21.1L43.2 24.5L44.6 23.0L45.9 18.7L48.0 19.6L50.0 23.6L51.8 22.6L54.1 18.7L56.0 20.1L56.8 24.5L58.8 24.0L62.1 20.8L63.5 22.6L63.2 27.1L65.3 27.1L69.2 24.9L70.1 27.1L68.7 31.3L70.7 31.9L75.1 30.8L75.4 33.1L72.9 36.8L74.7 37.8L79.2 37.9L78.9 40.2L75.5 43.2L77.0 44.6L81.3 45.9L80.4 48.0L76.4 50.0Z\" stroke-width=\"0.45\"/></svg><span>🦊</span><figcaption>Tu<b class=\"ds-neg\">−42,25 €</b></figcaption></figure><figure class=\"ds-portrait\" style=\"--ink-line:#c8457f;--ink-wash:#f5d3e1\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" aria-hidden=\"true\"><path pathLength=\"1\" d=\"M91.0 50.0L95.5 53.0L97.1 56.2L94.7 58.9L89.6 60.6L84.5 61.7L81.9 63.2L82.6 66.1L85.5 70.5L87.9 75.3L87.7 78.9L84.3 80.1L79.0 79.0L74.0 77.4L71.0 77.4L70.2 80.3L70.5 85.5L70.2 90.9L68.2 93.9L64.7 93.2L60.6 89.6L57.1 85.7L54.5 84.2L52.4 86.3L50.0 91.0L47.0 95.5L43.8 97.1L41.1 94.7L39.4 89.6L38.3 84.5L36.8 81.9L33.9 82.6L29.5 85.5L24.7 87.9L21.1 87.7L19.9 84.3L21.0 79.0L22.6 74.0L22.6 71.0L19.7 70.2L14.5 70.5L9.1 70.2L6.1 68.2L6.8 64.7L10.4 60.6L14.3 57.1L15.8 54.5L13.7 52.4L9.0 50.0L4.5 47.0L2.9 43.8L5.3 41.1L10.4 39.4L15.5 38.3L18.1 36.8L17.4 33.9L14.5 29.5L12.1 24.7L12.3 21.1L15.7 19.9L21.0 21.0L26.0 22.6L29.0 22.6L29.8 19.7L29.5 14.5L29.8 9.1L31.8 6.1L35.3 6.8L39.4 10.4L42.9 14.3L45.5 15.8L47.6 13.7L50.0 9.0L53.0 4.5L56.2 2.9L58.9 5.3L60.6 10.4L61.7 15.5L63.2 18.1L66.1 17.4L70.5 14.5L75.3 12.1L78.9 12.3L80.1 15.7L79.0 21.0L77.4 26.0L77.4 29.0L80.3 29.8L85.5 29.5L90.9 29.8L93.9 31.8L93.2 35.3L89.6 39.4L85.7 42.9L84.2 45.5L86.3 47.6L91.0 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M96.6 50.0L97.2 53.1L93.9 55.8L88.6 57.7L84.2 59.2L82.9 61.2L84.9 64.4L88.3 68.9L90.4 73.3L89.3 76.3L85.1 76.9L79.6 75.9L75.0 75.0L72.9 76.1L73.0 79.9L73.7 85.5L73.3 90.4L70.9 92.4L66.9 90.9L62.6 87.2L59.2 84.2L56.8 84.1L54.9 87.4L52.8 92.6L50.0 96.6L46.9 97.2L44.2 93.9L42.3 88.6L40.8 84.2L38.8 82.9L35.6 84.9L31.1 88.3L26.7 90.4L23.7 89.3L23.1 85.1L24.1 79.6L25.0 75.0L23.9 72.9L20.1 73.0L14.5 73.7L9.6 73.3L7.6 70.9L9.1 66.9L12.8 62.6L15.8 59.2L15.9 56.8L12.6 54.9L7.4 52.8L3.4 50.0L2.8 46.9L6.1 44.2L11.4 42.3L15.8 40.8L17.1 38.8L15.1 35.6L11.7 31.1L9.6 26.7L10.7 23.7L14.9 23.1L20.4 24.1L25.0 25.0L27.1 23.9L27.0 20.1L26.3 14.5L26.7 9.6L29.1 7.6L33.1 9.1L37.4 12.8L40.8 15.8L43.2 15.9L45.1 12.6L47.2 7.4L50.0 3.4L53.1 2.8L55.8 6.1L57.7 11.4L59.2 15.8L61.2 17.1L64.4 15.1L68.9 11.7L73.3 9.6L76.3 10.7L76.9 14.9L75.9 20.4L75.0 25.0L76.1 27.1L79.9 27.0L85.5 26.3L90.4 26.7L92.4 29.1L90.9 33.1L87.2 37.4L84.2 40.8L84.1 43.2L87.4 45.1L92.6 47.2L96.6 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M96.6 50.0L92.6 52.8L87.4 54.9L84.1 56.8L84.2 59.2L87.2 62.6L90.9 66.9L92.4 70.9L90.4 73.3L85.5 73.7L79.9 73.0L76.1 72.9L75.0 75.0L75.9 79.6L76.9 85.1L76.3 89.3L73.3 90.4L68.9 88.3L64.4 84.9L61.2 82.9L59.2 84.2L57.7 88.6L55.8 93.9L53.1 97.2L50.0 96.6L47.2 92.6L45.1 87.4L43.2 84.1L40.8 84.2L37.4 87.2L33.1 90.9L29.1 92.4L26.7 90.4L26.3 85.5L27.0 79.9L27.1 76.1L25.0 75.0L20.4 75.9L14.9 76.9L10.7 76.3L9.6 73.3L11.7 68.9L15.1 64.4L17.1 61.2L15.8 59.2L11.4 57.7L6.1 55.8L2.8 53.1L3.4 50.0L7.4 47.2L12.6 45.1L15.9 43.2L15.8 40.8L12.8 37.4L9.1 33.1L7.6 29.1L9.6 26.7L14.5 26.3L20.1 27.0L23.9 27.1L25.0 25.0L24.1 20.4L23.1 14.9L23.7 10.7L26.7 9.6L31.1 11.7L35.6 15.1L38.8 17.1L40.8 15.8L42.3 11.4L44.2 6.1L46.9 2.8L50.0 3.4L52.8 7.4L54.9 12.6L56.8 15.9L59.2 15.8L62.6 12.8L66.9 9.1L70.9 7.6L73.3 9.6L73.7 14.5L73.0 20.1L72.9 23.9L75.0 25.0L79.6 24.1L85.1 23.1L89.3 23.7L90.4 26.7L88.3 31.1L84.9 35.6L82.9 38.8L84.2 40.8L88.6 42.3L93.9 44.2L97.2 46.9L96.6 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M91.0 50.0L86.3 52.4L84.2 54.5L85.7 57.1L89.6 60.6L93.2 64.7L93.9 68.2L90.9 70.2L85.5 70.5L80.3 70.2L77.4 71.0L77.4 74.0L79.0 79.0L80.1 84.3L78.9 87.7L75.3 87.9L70.5 85.5L66.1 82.6L63.2 81.9L61.7 84.5L60.6 89.6L58.9 94.7L56.2 97.1L53.0 95.5L50.0 91.0L47.6 86.3L45.5 84.2L42.9 85.7L39.4 89.6L35.3 93.2L31.8 93.9L29.8 90.9L29.5 85.5L29.8 80.3L29.0 77.4L26.0 77.4L21.0 79.0L15.7 80.1L12.3 78.9L12.1 75.3L14.5 70.5L17.4 66.1L18.1 63.2L15.5 61.7L10.4 60.6L5.3 58.9L2.9 56.2L4.5 53.0L9.0 50.0L13.7 47.6L15.8 45.5L14.3 42.9L10.4 39.4L6.8 35.3L6.1 31.8L9.1 29.8L14.5 29.5L19.7 29.8L22.6 29.0L22.6 26.0L21.0 21.0L19.9 15.7L21.1 12.3L24.7 12.1L29.5 14.5L33.9 17.4L36.8 18.1L38.3 15.5L39.4 10.4L41.1 5.3L43.8 2.9L47.0 4.5L50.0 9.0L52.4 13.7L54.5 15.8L57.1 14.3L60.6 10.4L64.7 6.8L68.2 6.1L70.2 9.1L70.5 14.5L70.2 19.7L71.0 22.6L74.0 22.6L79.0 21.0L84.3 19.9L87.7 21.1L87.9 24.7L85.5 29.5L82.6 33.9L81.9 36.8L84.5 38.3L89.6 39.4L94.7 41.1L97.1 43.8L95.5 47.0L91.0 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M85.4 50.0L84.6 52.3L87.4 54.9L91.9 58.3L95.0 62.1L94.8 65.2L90.9 66.9L85.3 67.4L80.6 67.7L78.9 69.3L79.9 73.0L82.1 78.1L83.0 83.0L81.2 85.5L76.9 85.1L71.8 82.7L67.7 80.6L65.4 81.1L64.4 84.9L63.7 90.4L62.1 95.0L59.2 96.4L55.8 93.9L52.6 89.2L50.0 85.4L47.7 84.6L45.1 87.4L41.7 91.9L37.9 95.0L34.8 94.8L33.1 90.9L32.6 85.3L32.3 80.6L30.7 78.9L27.0 79.9L21.9 82.1L17.0 83.0L14.5 81.2L14.9 76.9L17.3 71.8L19.4 67.7L18.9 65.4L15.1 64.4L9.6 63.7L5.0 62.1L3.6 59.2L6.1 55.8L10.8 52.6L14.6 50.0L15.4 47.7L12.6 45.1L8.1 41.7L5.0 37.9L5.2 34.8L9.1 33.1L14.7 32.6L19.4 32.3L21.1 30.7L20.1 27.0L17.9 21.9L17.0 17.0L18.8 14.5L23.1 14.9L28.2 17.3L32.3 19.4L34.6 18.9L35.6 15.1L36.3 9.6L37.9 5.0L40.8 3.6L44.2 6.1L47.4 10.8L50.0 14.6L52.3 15.4L54.9 12.6L58.3 8.1L62.1 5.0L65.2 5.2L66.9 9.1L67.4 14.7L67.7 19.4L69.3 21.1L73.0 20.1L78.1 17.9L83.0 17.0L85.5 18.8L85.1 23.1L82.7 28.2L80.6 32.3L81.1 34.6L84.9 35.6L90.4 36.3L95.0 37.9L96.4 40.8L93.9 44.2L89.2 47.4L85.4 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M85.4 50.0L89.2 52.6L93.9 55.8L96.4 59.2L95.0 62.1L90.4 63.7L84.9 64.4L81.1 65.4L80.6 67.7L82.7 71.8L85.1 76.9L85.5 81.2L83.0 83.0L78.1 82.1L73.0 79.9L69.3 78.9L67.7 80.6L67.4 85.3L66.9 90.9L65.2 94.8L62.1 95.0L58.3 91.9L54.9 87.4L52.3 84.6L50.0 85.4L47.4 89.2L44.2 93.9L40.8 96.4L37.9 95.0L36.3 90.4L35.6 84.9L34.6 81.1L32.3 80.6L28.2 82.7L23.1 85.1L18.8 85.5L17.0 83.0L17.9 78.1L20.1 73.0L21.1 69.3L19.4 67.7L14.7 67.4L9.1 66.9L5.2 65.2L5.0 62.1L8.1 58.3L12.6 54.9L15.4 52.3L14.6 50.0L10.8 47.4L6.1 44.2L3.6 40.8L5.0 37.9L9.6 36.3L15.1 35.6L18.9 34.6L19.4 32.3L17.3 28.2L14.9 23.1L14.5 18.8L17.0 17.0L21.9 17.9L27.0 20.1L30.7 21.1L32.3 19.4L32.6 14.7L33.1 9.1L34.8 5.2L37.9 5.0L41.7 8.1L45.1 12.6L47.7 15.4L50.0 14.6L52.6 10.8L55.8 6.1L59.2 3.6L62.1 5.0L63.7 9.6L64.4 15.1L65.4 18.9L67.7 19.4L71.8 17.3L76.9 14.9L81.2 14.5L83.0 17.0L82.1 21.9L79.9 27.0L78.9 30.7L80.6 32.3L85.3 32.6L90.9 33.1L94.8 34.8L95.0 37.9L91.9 41.7L87.4 45.1L84.6 47.7L85.4 50.0Z\" stroke-width=\"0.6\"/><path pathLength=\"1\" d=\"M79.0 50.0L81.9 52.1L78.8 53.8L75.5 55.1L78.0 57.5L80.3 60.3L76.8 61.1L73.3 61.5L75.1 64.5L76.6 67.8L73.0 67.7L69.5 67.1L70.5 70.5L71.1 74.1L67.7 73.0L64.4 71.6L64.5 75.1L64.2 78.7L61.1 76.8L58.4 74.6L57.5 78.0L56.2 81.4L53.8 78.8L51.7 75.9L50.0 79.0L47.9 81.9L46.2 78.8L44.9 75.5L42.5 78.0L39.7 80.3L38.9 76.8L38.5 73.3L35.5 75.1L32.2 76.6L32.3 73.0L32.9 69.5L29.5 70.5L25.9 71.1L27.0 67.7L28.4 64.4L24.9 64.5L21.3 64.2L23.2 61.1L25.4 58.4L22.0 57.5L18.6 56.2L21.2 53.8L24.1 51.7L21.0 50.0L18.1 47.9L21.2 46.2L24.5 44.9L22.0 42.5L19.7 39.7L23.2 38.9L26.7 38.5L24.9 35.5L23.4 32.2L27.0 32.3L30.5 32.9L29.5 29.5L28.9 25.9L32.3 27.0L35.6 28.4L35.5 24.9L35.8 21.3L38.9 23.2L41.6 25.4L42.5 22.0L43.8 18.6L46.2 21.2L48.3 24.1L50.0 21.0L52.1 18.1L53.8 21.2L55.1 24.5L57.5 22.0L60.3 19.7L61.1 23.2L61.5 26.7L64.5 24.9L67.8 23.4L67.7 27.0L67.1 30.5L70.5 29.5L74.1 28.9L73.0 32.3L71.6 35.6L75.1 35.5L78.7 35.8L76.8 38.9L74.6 41.6L78.0 42.5L81.4 43.8L78.8 46.2L75.9 48.3L79.0 50.0Z\" stroke-width=\"0.45\"/><path pathLength=\"1\" d=\"M81.6 50.0L77.4 51.8L76.2 53.4L79.9 56.0L80.5 58.2L76.0 58.8L74.4 60.1L77.4 63.5L77.4 65.8L72.9 65.3L70.9 66.1L72.9 70.1L72.3 72.3L68.1 70.7L66.1 70.9L66.9 75.4L65.8 77.4L62.2 74.7L60.1 74.4L59.8 78.9L58.2 80.5L55.4 77.0L53.4 76.2L52.0 80.4L50.0 81.6L48.2 77.4L46.6 76.2L44.0 79.9L41.8 80.5L41.2 76.0L39.9 74.4L36.5 77.4L34.2 77.4L34.7 72.9L33.9 70.9L29.9 72.9L27.7 72.3L29.3 68.1L29.1 66.1L24.6 66.9L22.6 65.8L25.3 62.2L25.6 60.1L21.1 59.8L19.5 58.2L23.0 55.4L23.8 53.4L19.6 52.0L18.4 50.0L22.6 48.2L23.8 46.6L20.1 44.0L19.5 41.8L24.0 41.2L25.6 39.9L22.6 36.5L22.6 34.2L27.1 34.7L29.1 33.9L27.1 29.9L27.7 27.7L31.9 29.3L33.9 29.1L33.1 24.6L34.2 22.6L37.8 25.3L39.9 25.6L40.2 21.1L41.8 19.5L44.6 23.0L46.6 23.8L48.0 19.6L50.0 18.4L51.8 22.6L53.4 23.8L56.0 20.1L58.2 19.5L58.8 24.0L60.1 25.6L63.5 22.6L65.8 22.6L65.3 27.1L66.1 29.1L70.1 27.1L72.3 27.7L70.7 31.9L70.9 33.9L75.4 33.1L77.4 34.2L74.7 37.8L74.4 39.9L78.9 40.2L80.5 41.8L77.0 44.6L76.2 46.6L80.4 48.0L81.6 50.0Z\" stroke-width=\"0.45\"/><path pathLength=\"1\" d=\"M76.4 50.0L77.4 51.8L81.3 54.1L79.9 56.0L75.5 56.8L76.0 58.8L79.2 62.1L77.4 63.5L72.9 63.2L72.9 65.3L75.1 69.2L72.9 70.1L68.7 68.7L68.1 70.7L69.2 75.1L66.9 75.4L63.2 72.9L62.2 74.7L62.1 79.2L59.8 78.9L56.8 75.5L55.4 77.0L54.1 81.3L52.0 80.4L50.0 76.4L48.2 77.4L45.9 81.3L44.0 79.9L43.2 75.5L41.2 76.0L37.9 79.2L36.5 77.4L36.8 72.9L34.7 72.9L30.8 75.1L29.9 72.9L31.3 68.7L29.3 68.1L24.9 69.2L24.6 66.9L27.1 63.2L25.3 62.2L20.8 62.1L21.1 59.8L24.5 56.8L23.0 55.4L18.7 54.1L19.6 52.0L23.6 50.0L22.6 48.2L18.7 45.9L20.1 44.0L24.5 43.2L24.0 41.2L20.8 37.9L22.6 36.5L27.1 36.8L27.1 34.7L24.9 30.8L27.1 29.9L31.3 31.3L31.9 29.3L30.8 24.9L33.1 24.6L36.8 27.1L37.8 25.3L37.9 20.8L40.2 21.1L43.2 24.5L44.6 23.0L45.9 18.7L48.0 19.6L50.0 23.6L51.8 22.6L54.1 18.7L56.0 20.1L56.8 24.5L58.8 24.0L62.1 20.8L63.5 22.6L63.2 27.1L65.3 27.1L69.2 24.9L70.1 27.1L68.7 31.3L70.7 31.9L75.1 30.8L75.4 33.1L72.9 36.8L74.7 37.8L79.2 37.9L78.9 40.2L75.5 43.2L77.0 44.6L81.3 45.9L80.4 48.0L76.4 50.0Z\" stroke-width=\"0.45\"/></svg><span>🐨</span><figcaption>Marco<b class=\"ds-pos\">+42,25 €</b></figcaption></figure></div>",
+      "css": ".ds-portraits { display:flex; gap:16px; font-family:'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; color:var(--ink, #10201b); } .ds-portrait { margin:0; display:grid; justify-items:center; width:92px; text-align:center; } .ds-portrait svg { grid-area:1/1; width:68px; height:68px; color:var(--ink-line); } .ds-portrait > span { grid-area:1/1; align-self:center; display:grid; place-items:center; width:38px; height:38px; border-radius:9999px; background:var(--ink-wash); font-size:22px; line-height:1; } .ds-portrait figcaption { margin-top:6px; font-size:14px; font-weight:600; display:grid; } .ds-portrait b { font-size:15px; font-weight:700; font-variant-numeric:lining-nums; } .ds-neg { color:var(--owe, #b2361f); } .ds-pos { color:var(--owed, #1b6a4d); } .ds-portrait:hover svg path { stroke-dasharray:1; animation:ds-draw 900ms cubic-bezier(0.16, 1, 0.3, 1) both; } @keyframes ds-draw { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }"
+    },
+    {
+      "name": "Room Note Strip",
+      "kind": "custom",
+      "description": "Room header: extra-bold name, microprint-labelled total, vermilion mono serial, guilloche band in the viewer ink.",
+      "html": "<header class=\"ds-note\"><div class=\"ds-note-top\"><h1>Weekend a Lisbona</h1><p><span class=\"ds-micro\">Totale speso</span><b>84,50 €</b></p></div><p class=\"ds-serial-row\"><span class=\"ds-micro\">Serie</span><span class=\"ds-serial\">delfino-capra-pulcino-4961</span></p><svg class=\"ds-band\" viewBox=\"0 0 600 40\" preserveAspectRatio=\"none\" fill=\"none\" stroke=\"currentColor\" aria-hidden=\"true\"><path d=\"M0 20.0L6 24.3L12 28.0L18 30.3L24 30.8L30 29.1L36 25.5L42 20.7L48 15.6L54 11.1L60 8.2L66 7.6L72 9.3L78 13.1L84 18.4L90 24.0L96 28.9L102 32.1L108 32.9L114 31.3L120 27.5L126 22.4L132 16.9L138 12.1L144 8.9L150 8.0L156 9.3L162 12.6L168 17.2L174 22.1L180 26.3L186 29.2L192 30.1L198 29.2L204 26.5L210 22.9L216 18.9L222 15.4L228 12.9L234 12.0L240 12.5L246 14.5L252 17.3L258 20.5L264 23.4L270 25.5L276 26.6L282 26.4L288 25.1L294 22.8L300 20.0L306 17.2L312 14.9L318 13.6L324 13.4L330 14.5L336 16.6L342 19.5L348 22.7L354 25.5L360 27.5L366 28.0L372 27.1L378 24.6L384 21.1L390 17.1L396 13.5L402 10.8L408 9.9L414 10.8L420 13.7L426 17.9L432 22.8L438 27.4L444 30.7L450 32.0L456 31.1L462 27.9L468 23.1L474 17.6L480 12.5L486 8.7L492 7.1L498 7.9L504 11.1L510 16.0L516 21.6L522 26.9L528 30.7L534 32.4L540 31.8L546 28.9L552 24.4L558 19.3L564 14.5L570 10.9L576 9.2L582 9.7L588 12.0L594 15.7L600 20.0\" stroke-width=\"0.6\" vector-effect=\"non-scaling-stroke\"/><path d=\"M0 28.4L6 30.0L12 29.7L18 27.5L24 23.6L30 18.8L36 14.0L42 10.2L48 8.2L54 8.3L60 10.8L66 15.1L72 20.5L78 25.9L84 30.3L90 32.7L96 32.7L102 30.2L108 25.8L114 20.3L120 14.8L126 10.4L132 7.9L138 7.7L144 9.9L150 14.0L156 19.0L162 24.0L168 28.1L174 30.4L180 30.7L186 28.9L192 25.6L198 21.4L204 17.2L210 13.8L216 11.8L222 11.4L228 12.6L234 15.1L240 18.4L246 21.7L252 24.6L258 26.4L264 27.0L270 26.3L276 24.4L282 21.8L288 18.9L294 16.3L300 14.4L306 13.5L312 13.9L318 15.4L324 17.8L330 20.7L336 23.6L342 26.0L348 27.3L354 27.3L360 25.8L366 23.1L372 19.6L378 16.0L384 12.9L390 11.0L396 10.7L402 12.3L408 15.5L414 19.8L420 24.4L426 28.4L432 30.9L438 31.4L444 29.7L450 26.0L456 21.0L462 15.7L468 11.0L474 8.0L480 7.2L486 8.9L492 12.8L498 18.1L504 23.8L510 28.7L516 31.9L522 32.8L528 31.2L534 27.6L540 22.6L546 17.2L552 12.6L558 9.5L564 8.5L570 9.7L576 12.8L582 17.1L588 21.7L594 25.7L600 28.4\" stroke-width=\"0.6\" vector-effect=\"non-scaling-stroke\"/><path d=\"M0 28.4L6 25.7L12 21.7L18 17.1L24 12.8L30 9.7L36 8.5L42 9.5L48 12.6L54 17.2L60 22.6L66 27.6L72 31.2L78 32.8L84 31.9L90 28.7L96 23.8L102 18.1L108 12.8L114 8.9L120 7.2L126 8.0L132 11.0L138 15.7L144 21.0L150 26.0L156 29.7L162 31.4L168 30.9L174 28.4L180 24.4L186 19.8L192 15.5L198 12.3L204 10.7L210 11.0L216 12.9L222 16.0L228 19.6L234 23.1L240 25.8L246 27.3L252 27.3L258 26.0L264 23.6L270 20.7L276 17.8L282 15.4L288 13.9L294 13.5L300 14.4L306 16.3L312 18.9L318 21.8L324 24.4L330 26.3L336 27.0L342 26.4L348 24.6L354 21.7L360 18.4L366 15.1L372 12.6L378 11.4L384 11.8L390 13.8L396 17.2L402 21.4L408 25.6L414 28.9L420 30.7L426 30.4L432 28.1L438 24.0L444 19.0L450 14.0L456 9.9L462 7.7L468 7.9L474 10.4L480 14.8L486 20.3L492 25.8L498 30.2L504 32.7L510 32.7L516 30.3L522 25.9L528 20.5L534 15.1L540 10.8L546 8.3L552 8.2L558 10.2L564 14.0L570 18.8L576 23.6L582 27.5L588 29.7L594 30.0L600 28.4\" stroke-width=\"0.6\" vector-effect=\"non-scaling-stroke\"/><path d=\"M0 20.0L6 15.7L12 12.0L18 9.7L24 9.2L30 10.9L36 14.5L42 19.3L48 24.4L54 28.9L60 31.8L66 32.4L72 30.7L78 26.9L84 21.6L90 16.0L96 11.1L102 7.9L108 7.1L114 8.7L120 12.5L126 17.6L132 23.1L138 27.9L144 31.1L150 32.0L156 30.7L162 27.4L168 22.8L174 17.9L180 13.7L186 10.8L192 9.9L198 10.8L204 13.5L210 17.1L216 21.1L222 24.6L228 27.1L234 28.0L240 27.5L246 25.5L252 22.7L258 19.5L264 16.6L270 14.5L276 13.4L282 13.6L288 14.9L294 17.2L300 20.0L306 22.8L312 25.1L318 26.4L324 26.6L330 25.5L336 23.4L342 20.5L348 17.3L354 14.5L360 12.5L366 12.0L372 12.9L378 15.4L384 18.9L390 22.9L396 26.5L402 29.2L408 30.1L414 29.2L420 26.3L426 22.1L432 17.2L438 12.6L444 9.3L450 8.0L456 8.9L462 12.1L468 16.9L474 22.4L480 27.5L486 31.3L492 32.9L498 32.1L504 28.9L510 24.0L516 18.4L522 13.1L528 9.3L534 7.6L540 8.2L546 11.1L552 15.6L558 20.7L564 25.5L570 29.1L576 30.8L582 30.3L588 28.0L594 24.3L600 20.0\" stroke-width=\"0.6\" vector-effect=\"non-scaling-stroke\"/><path d=\"M0 11.6L6 10.0L12 10.3L18 12.5L24 16.4L30 21.2L36 26.0L42 29.8L48 31.8L54 31.7L60 29.2L66 24.9L72 19.5L78 14.1L84 9.7L90 7.3L96 7.3L102 9.8L108 14.2L114 19.7L120 25.2L126 29.6L132 32.1L138 32.3L144 30.1L150 26.0L156 21.0L162 16.0L168 11.9L174 9.6L180 9.3L186 11.1L192 14.4L198 18.6L204 22.8L210 26.2L216 28.2L222 28.6L228 27.4L234 24.9L240 21.6L246 18.3L252 15.4L258 13.6L264 13.0L270 13.7L276 15.6L282 18.2L288 21.1L294 23.7L300 25.6L306 26.5L312 26.1L318 24.6L324 22.2L330 19.3L336 16.4L342 14.0L348 12.7L354 12.7L360 14.2L366 16.9L372 20.4L378 24.0L384 27.1L390 29.0L396 29.3L402 27.7L408 24.5L414 20.2L420 15.6L426 11.6L432 9.1L438 8.6L444 10.3L450 14.0L456 19.0L462 24.3L468 29.0L474 32.0L480 32.8L486 31.1L492 27.2L498 21.9L504 16.2L510 11.3L516 8.1L522 7.2L528 8.8L534 12.4L540 17.4L546 22.8L552 27.4L558 30.5L564 31.5L570 30.3L576 27.2L582 22.9L588 18.3L594 14.3L600 11.6\" stroke-width=\"0.6\" vector-effect=\"non-scaling-stroke\"/><path d=\"M0 11.6L6 14.3L12 18.3L18 22.9L24 27.2L30 30.3L36 31.5L42 30.5L48 27.4L54 22.8L60 17.4L66 12.4L72 8.8L78 7.2L84 8.1L90 11.3L96 16.2L102 21.9L108 27.2L114 31.1L120 32.8L126 32.0L132 29.0L138 24.3L144 19.0L150 14.0L156 10.3L162 8.6L168 9.1L174 11.6L180 15.6L186 20.2L192 24.5L198 27.7L204 29.3L210 29.0L216 27.1L222 24.0L228 20.4L234 16.9L240 14.2L246 12.7L252 12.7L258 14.0L264 16.4L270 19.3L276 22.2L282 24.6L288 26.1L294 26.5L300 25.6L306 23.7L312 21.1L318 18.2L324 15.6L330 13.7L336 13.0L342 13.6L348 15.4L354 18.3L360 21.6L366 24.9L372 27.4L378 28.6L384 28.2L390 26.2L396 22.8L402 18.6L408 14.4L414 11.1L420 9.3L426 9.6L432 11.9L438 16.0L444 21.0L450 26.0L456 30.1L462 32.3L468 32.1L474 29.6L480 25.2L486 19.7L492 14.2L498 9.8L504 7.3L510 7.3L516 9.7L522 14.1L528 19.5L534 24.9L540 29.2L546 31.7L552 31.8L558 29.8L564 26.0L570 21.2L576 16.4L582 12.5L588 10.3L594 10.0L600 11.6\" stroke-width=\"0.6\" vector-effect=\"non-scaling-stroke\"/></svg></header>",
+      "css": ".ds-note { padding:12px 20px; background:var(--paper, #f2f4f0); color:var(--ink, #10201b); font-family:'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; } .ds-note-top { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; } .ds-note h1 { margin:0; font-size:clamp(1.75rem, 6vw, 2.5rem); line-height:1.05; font-weight:800; letter-spacing:-0.03em; text-wrap:balance; } .ds-note-top p { margin:0; text-align:right; display:grid; } .ds-note-top b { font-size:clamp(1.5rem, 5vw, 2rem); font-weight:800; letter-spacing:-0.02em; font-variant-numeric:lining-nums; } .ds-micro { font-family:'Spline Sans Mono', ui-monospace, monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-2, #4a5a54); } .ds-serial-row { margin:8px 0 0; display:flex; gap:8px; align-items:center; } .ds-serial { font-family:'Spline Sans Mono', ui-monospace, monospace; font-weight:600; font-size:14px; color:var(--owe, #b2361f); } .ds-band { display:block; width:100%; height:16px; margin-top:12px; color:#d39a12; opacity:0.55; }"
+    },
+    {
+      "name": "Lead Transfer Card",
+      "kind": "card",
+      "refersTo": "transfer-card-lead-owe",
+      "description": "The single next decision on the Balances tab: wash note, two portraits, direction headline, ink Mark-paid pill; hover previews the settle stamp.",
+      "html": "<div class=\"ds-lead\"><div class=\"ds-lead-row\"><span class=\"ds-mini\" style=\"background:#f6e6b4\">🦊</span><span class=\"ds-arrow\">→</span><span class=\"ds-mini\" style=\"background:#f5d3e1\">🐨</span><p>Devi 42,25 € a Marco</p></div><button class=\"ds-lead-btn\">Segna pagato</button><svg class=\"ds-stamp\" viewBox=\"0 0 240 92\" fill=\"none\" stroke=\"currentColor\" aria-hidden=\"true\"><rect x=\"4\" y=\"4\" width=\"232\" height=\"84\" rx=\"10\" stroke-width=\"3.5\"/><rect x=\"11\" y=\"11\" width=\"218\" height=\"70\" rx=\"6\" stroke-width=\"1.2\"/><text x=\"120\" y=\"52\" text-anchor=\"middle\" fill=\"currentColor\" stroke=\"none\" font-weight=\"600\" font-size=\"27\" letter-spacing=\"5\">SALDATO</text><text x=\"120\" y=\"70\" text-anchor=\"middle\" fill=\"currentColor\" stroke=\"none\" font-size=\"9\" letter-spacing=\"2.5\">· 09 OTT 2026 · SPLITSPLASH ·</text></svg></div>",
+      "css": ".ds-lead { position:relative; overflow:hidden; padding:20px; border-radius:14px; background:var(--owe-wash, #f8ddd5); color:var(--on-wash, #10201b); font-family:'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; } .ds-lead-row { display:flex; align-items:center; gap:12px; } .ds-lead-row p { margin:0; font-size:18px; font-weight:700; color:var(--owe, #b2361f); text-wrap:balance; } .ds-mini { display:grid; place-items:center; width:52px; height:52px; border-radius:9999px; font-size:28px; flex:none; } .ds-arrow { color:var(--ink-2, #4a5a54); } .ds-lead-btn { margin-top:16px; width:100%; height:44px; border:0; border-radius:9999px; background:var(--ink, #10201b); color:var(--paper, #f2f4f0); font:600 15px 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif; box-shadow:0 6px 18px -8px rgb(16 32 27 / 0.6); cursor:pointer; transition:transform 200ms; } .ds-lead-btn:active { transform:scale(0.98); } .ds-lead-btn:focus-visible { outline:2px solid var(--ink, #10201b); outline-offset:3px; } .ds-stamp { position:absolute; left:50%; top:50%; width:224px; margin:-42px 0 0 -112px; color:var(--owed, #1b6a4d); font-family:'Spline Sans Mono', ui-monospace, monospace; mix-blend-mode:multiply; opacity:0; transform:rotate(-14deg) scale(1.8); filter:blur(6px); transition:opacity 620ms cubic-bezier(0.16, 1, 0.3, 1), transform 620ms cubic-bezier(0.16, 1, 0.3, 1), filter 620ms cubic-bezier(0.16, 1, 0.3, 1); pointer-events:none; } .ds-lead:hover .ds-stamp { opacity:1; transform:rotate(-9deg) scale(1); filter:none; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Banknote Series",
+    "overview": "Every room is a series of notes printed on cool security paper, and every member is the animal portrait on one denomination. The system borrows the working vocabulary of modern security printing (procedural guilloche linework, rosette frames, mono serial numbers, tiny uppercase microprint, inked cancellation stamps) and uses it as structure, not ornament: rosettes frame people, guilloche bands rule off the room header, serials carry the passphrase, the stamp confirms a settled debt.\n\nThe surface itself stays quiet. A pale green-grey paper ground, one near-black green ink, hairline sage rules, and generous white space carry the screens; colour arrives only as denomination inks around portraits and as the two money-direction inks, vermilion and treasury green. Density is phone-first and calm: one column, 20px gutters, a single thumb-reach pill for the primary action, everything else secondary.\n\nDark mode is the night vault: the paper turns to a deep green-black and type to paper tone, but the portrait wash disks stay light so animal emoji keep their contrast. Motion is exponential ease-out and always skippable under reduced motion.",
+    "keyCharacteristics": [
+      "Security-paper neutrals with one green-black ink; colour is earned, not ambient.",
+      "Six member denomination inks (saffron, carmine, teal, cobalt, umber, violet), each a deep/wash/line triad.",
+      "Money direction owns two inks: vermilion for \"you owe\", green for \"you are owed\".",
+      "Procedural SVG guilloche and rosettes as the signature linework.",
+      "Heavy grotesk display with proportional lining figures; mono reserved for serials and microprint.",
+      "Pills for actions, 14px notes for cards, 20px sheets rising from the bottom."
+    ],
+    "rules": [
+      {
+        "name": "The Reserved Ink Rule",
+        "body": "Vermilion and green mean money direction. No member denomination ink may sit near either hue; that is why ink-1 is carmine rose and ink-2 is teal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Light Wash Rule",
+        "body": "Portrait and chip washes stay paper-light in both schemes, and any text on a wash uses Wash Ink, never the scheme's `ink`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Seal Exception",
+        "body": "Vermilion may appear outside a money context only as print-world seal ink: the mono serial, the wordmark dot, the specimen overprint. Never on a sans-serif figure that is not a debt.",
+        "section": "colors"
+      },
+      {
+        "name": "The Proportional Figures Rule",
+        "body": "Amounts use lining, proportional figures. Never switch on `tnum`: this face's tabular set widens the decimal comma and breaks `12,00 €`. Align columns by right-aligning, not by tabular width.",
+        "section": "typography"
+      },
+      {
+        "name": "The Press Numbers Rule",
+        "body": "Mono is for things a printing press would number (serials, microprint, the cancellation mark). Names, amounts and headings are always the grotesk.",
+        "section": "typography"
+      },
+      {
+        "name": "The Floating Paper Rule",
+        "body": "A shadow means \"this is a separate sheet of paper or a pressable seal\". Cards in a list are flat with a 1px Hairline Sage ring; never shadow a list card.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** give every member a denomination ink class and use its triad together: line for the rosette, wash for the disk, deep for any tinted text.",
+      "**Do** keep vermilion and green for the direction of money, and colour signed balances by sign (green positive, vermilion negative, Faded Intaglio at zero).",
+      "**Do** put text on washes in Wash Ink (#10201b), in both schemes.",
+      "**Do** set every amount with lining proportional figures and right-align amount columns.",
+      "**Do** use exponential ease-out (`cubic-bezier(0.16, 1, 0.3, 1)`) for entrances and honour reduced motion by collapsing all animation to 1ms.",
+      "**Do** lead the Balances view with the single next decision on a wash card, then list the rest flat."
+    ],
+    "donts": [
+      "**Don't** turn on tabular figures for amounts; the tabular comma is too wide in this face.",
+      "**Don't** add a seventh member ink in the red or green family; it would read as debt or credit.",
+      "**Don't** darken portrait washes in dark mode; dark animals (🦓 🐺) vanish on dark disks.",
+      "**Don't** set names, headings or amounts in the mono; it belongs to serials and microprint.",
+      "**Don't** put a microprint label above a headline as a kicker; microprint labels a value or groups a list.",
+      "**Don't** shadow list cards or use hard offset shadows; elevation is only for floating paper and pressable pills."
+    ]
+  }
+}
