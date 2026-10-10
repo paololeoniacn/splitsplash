@@ -38,7 +38,7 @@ npm test                            # test della logica (split, saldi, passphras
 
 ```bash
 npx wrangler login
-npx wrangler d1 create splitsplash  # copia il database_id in wrangler.jsonc
+npx wrangler d1 create splitsplash  # solo per un nuovo account: copia il database_id in wrangler.jsonc
 npx wrangler secret put PEPPER      # stringa casuale lunga; NON cambiarla dopo (invalida passphrase)
 npm run db:migrate:remote
 npm run deploy
@@ -59,3 +59,5 @@ e `CLOUDFLARE_ACCOUNT_ID`.
 - Nel DB la passphrase è salvata come hash con pepper (per il lookup) e cifrata AES-GCM (per
   poterla mostrare ai membri); i token dei membri solo come hash.
 - Le icone PWA in `public/` sono generate da `scripts/icons.mjs`.
+
+Istanza attuale: https://splitsplash.paololeoni884428.workers.dev

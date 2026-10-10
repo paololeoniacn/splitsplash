@@ -13,7 +13,7 @@
       "binding": "DB",
       "database_name": "splitsplash",
       // Replace with the id printed by `npx wrangler d1 create splitsplash`
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "38df91fa-c158-4c66-8d56-a23449c10f30",
       "migrations_dir": "migrations"
     }
   ],
