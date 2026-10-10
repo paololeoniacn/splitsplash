@@ -60,4 +60,8 @@ e `CLOUDFLARE_ACCOUNT_ID`.
   poterla mostrare ai membri); i token dei membri solo come hash.
 - Le icone PWA in `public/` sono generate da `scripts/icons.mjs`.
 
-Istanza attuale: https://splitsplash.paololeoni884428.workers.dev
+Istanza attuale: **https://splitsplash.pages.dev** (anche https://splitsplash.paololeoni884428.workers.dev).
+
+`splitsplash.pages.dev` è un progetto Cloudflare Pages minimale (`pages/`) che inoltra ogni richiesta
+al Worker tramite service binding: il codice e il database restano uno solo. Va ripubblicato solo se
+cambia `pages/` (`npm run deploy:pages`); i normali deploy del Worker valgono anche per pages.dev.
