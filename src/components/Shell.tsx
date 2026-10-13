@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { LanguageToggle } from './LanguageToggle';
 import { IconButton } from './ui';
+import { VersionFooter } from './VersionFooter';
 import { Wordmark } from './Wordmark';
 
 /** Narrow single-task page: create, join, invite. */
@@ -27,6 +28,7 @@ export function FormShell({ title, children, back = '/' }: { title: string; chil
         <h1 className="mb-8 text-[2rem] leading-tight font-extrabold tracking-[-0.03em]">{title}</h1>
         {children}
       </main>
+      <VersionFooter />
     </div>
   );
 }

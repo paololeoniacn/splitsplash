@@ -10,7 +10,7 @@ import { Button } from '../components/ui';
 import { Wordmark } from '../components/Wordmark';
 import { useMoney } from '../lib/format';
 import { savedRooms } from '../lib/storage';
-import { APP_VERSION } from '../version';
+import { VersionFooter } from '../components/VersionFooter';
 import { useMemo } from 'react';
 
 const SPECIMEN = [
@@ -85,7 +85,7 @@ export default function Landing() {
         ))}
       </section>
       <p className="text-sm text-ink-2">{t('landing.privacy')}</p>
-      <p className="microprint pt-4 pb-8 text-ink-2/70">v {APP_VERSION}</p>
+      <VersionFooter className="pb-8" />
     </div>
   );
 }

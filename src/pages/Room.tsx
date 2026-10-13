@@ -18,7 +18,7 @@ import { api, ApiError } from '../lib/api';
 import { useMoney } from '../lib/format';
 import { forgetRoom, tokenFor, touchRoom } from '../lib/storage';
 import { activityKey, roomKey, useExpenses, useRoom } from '../lib/useRoom';
-import { APP_VERSION } from '../version';
+import { VersionFooter } from '../components/VersionFooter';
 import { isLegacyPassphrase } from '../../shared/passphrase';
 
 export interface RoomCtx {
@@ -85,7 +85,7 @@ export default function Room() {
   const ordered = [byId.get(me)!, ...members.filter((m) => m.id !== me)].filter(Boolean);
 
   return (
-    <div className="mx-auto min-h-dvh max-w-3xl pb-32">
+    <div className="mx-auto flex min-h-dvh max-w-3xl flex-col pb-32">
       <header className="sticky top-0 z-20 bg-paper/92 backdrop-blur-md">
         <div className="flex items-center justify-between px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-1 sm:px-5">
           <Link to="/" aria-label={t('menu.home')} className="inline-grid size-10 place-items-center rounded-full hover:bg-ink/6">
@@ -176,9 +176,10 @@ export default function Room() {
         </ul>
       </nav>
 
-      <main className="px-5 pt-4">
+      <main className="flex-1 px-5 pt-4">
         <Outlet context={ctx} />
       </main>
+      <VersionFooter className="px-5" />
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <Button
@@ -263,7 +264,6 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
               </button>
             </li>
           ))}
-          <li className="microprint px-3 pt-3 text-ink-2/70">v {APP_VERSION}</li>
         </ul>
       )}
       {view !== 'main' && (
@@ -295,7 +295,12 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 text-center">{children}</div>;
+  return (
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col items-center px-6 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center">{children}</div>
+      <VersionFooter />
+    </div>
+  );
 }
 
 function NoAccess() {
