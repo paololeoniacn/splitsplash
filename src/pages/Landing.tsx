@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronRight, KeyRound } from 'lucide-react';
+import { ArrowRight, Check, ChevronRight, KeyRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { generatePassphrase } from '../../shared/passphrase';
@@ -11,6 +11,7 @@ import { Wordmark } from '../components/Wordmark';
 import { useMoney } from '../lib/format';
 import { savedRooms } from '../lib/storage';
 import { VersionFooter } from '../components/VersionFooter';
+import { SOURCE_URL } from '../lib/links';
 import { useMemo } from 'react';
 
 const SPECIMEN = [
@@ -47,6 +48,14 @@ export default function Landing() {
               {t('landing.haveCode')}
             </Button>
           </div>
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-ink-2" aria-label={t('landing.manifesto.label')}>
+            {(t('landing.perks', { returnObjects: true }) as string[]).map((p) => (
+              <li key={p} className="flex items-center gap-1.5">
+                <Check className="size-4 text-owed" aria-hidden="true" />
+                {p}
+              </li>
+            ))}
+          </ul>
 
           {rooms.length > 0 && (
             <nav aria-labelledby="your-rooms" className="mt-10">
@@ -83,6 +92,37 @@ export default function Landing() {
             <p className="pt-1 leading-snug">{s.text}</p>
           </div>
         ))}
+      </section>
+      <section aria-labelledby="manifesto" className="border-t border-rule py-12 sm:py-16">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+          <div>
+            <p className="microprint">{t('landing.manifesto.label')}</p>
+            <h2 id="manifesto" className="mt-3 text-[clamp(2rem,5vw,3.25rem)] leading-[1.02] font-extrabold tracking-[-0.03em] text-balance">
+              {t('landing.manifesto.title')}
+            </h2>
+            <p className="mt-4 max-w-[44ch] text-lg leading-relaxed text-ink-2">{t('landing.manifesto.lede')}</p>
+            <a
+              href={SOURCE_URL}
+              target="_blank"
+              rel="noopener"
+              className="mt-6 inline-flex items-center gap-2 font-semibold underline decoration-rule decoration-2 underline-offset-4 transition-colors hover:decoration-ink"
+            >
+              {t('landing.manifesto.source')}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </a>
+          </div>
+          <ol className="divide-y divide-rule border-y border-rule">
+            {(t('landing.manifesto.points', { returnObjects: true }) as [string, string][]).map(([title, body], i) => (
+              <li key={title} className="grid grid-cols-[2.5rem_1fr] gap-x-3 py-5">
+                <span className="num pt-0.5 font-mono text-sm font-semibold text-owe">{String(i + 1).padStart(2, '0')}</span>
+                <div>
+                  <h3 className="font-bold">{title}</h3>
+                  <p className="mt-1 leading-relaxed text-ink-2">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
       <p className="text-sm text-ink-2">{t('landing.privacy')}</p>
       <VersionFooter className="pb-8" />
