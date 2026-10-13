@@ -255,7 +255,7 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
         {kind === 'expense' && (
           <fieldset>
             <legend className="mb-2 text-sm font-semibold">{t('expense.category')}</legend>
-            <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+            <div className="relative -mx-5 flex gap-2 overflow-x-auto overscroll-x-contain px-5 py-1.5 -my-1.5">
               {CATEGORIES.map((c) => {
                 const Icon = CATEGORY_ICONS[c];
                 const on = c === category;
@@ -367,7 +367,7 @@ function MemberChoice({ label, members, me, value, onChange, name }: { label: st
   return (
     <fieldset>
       <legend className="mb-2 text-sm font-semibold">{label}</legend>
-      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+      <div className="relative -mx-5 flex gap-2 overflow-x-auto overscroll-x-contain px-5 py-1.5 -my-1.5">
         {members.map((m) => {
           const on = m.id === value;
           return (

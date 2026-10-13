@@ -35,7 +35,7 @@ export function Sheet({ open, onClose, title, children, footer }: { open: boolea
               <X className="size-5" aria-hidden="true" />
             </IconButton>
           </header>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{children}</div>
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-5 py-5">{children}</div>
           {footer && <footer className="border-t border-rule px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">{footer}</footer>}
         </div>
       )}
