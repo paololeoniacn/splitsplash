@@ -189,6 +189,39 @@ dialog.sheet::backdrop {
   animation: fade-in 240ms ease-out;
 }
 
+dialog.bunny {
+  margin: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+dialog.bunny::backdrop {
+  background: rgb(8 16 13 / 0.35);
+  backdrop-filter: blur(10px);
+  animation: fade-in 200ms ease-out;
+}
+.bunny-emoji {
+  display: block;
+  font-size: min(62vw, 22rem);
+  line-height: 1;
+  filter: drop-shadow(0 30px 40px rgb(0 0 0 / 0.3));
+}
+@keyframes bunny-in {
+  0% { opacity: 0; transform: translateY(40vh) scale(0.3) rotate(-20deg); }
+  55% { opacity: 1; transform: translateY(-6vh) scale(1.08) rotate(6deg); }
+  75% { transform: translateY(2vh) scale(0.97) rotate(-3deg); }
+  100% { transform: none; }
+}
+@keyframes bunny-out {
+  to { opacity: 0; transform: scale(1.6); filter: blur(8px); }
+}
+.bunny-in { animation: bunny-in 700ms var(--ease-out-expo) both; }
+.bunny-out { animation: bunny-out 260ms ease-in both; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

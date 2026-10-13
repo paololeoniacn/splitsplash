@@ -128,6 +128,7 @@ const it = {
     empty: 'Qui comparirà tutto ciò che succede nella room.',
     more: 'Mostra precedenti',
   },
+  egg: { close: 'Ciao coniglio! Tocca per chiudere' },
   expense: {
     calc: { add: 'Più', subtract: 'Meno', multiply: 'Per', divide: 'Diviso', equals: 'Calcola il totale', invalid: 'Calcolo non valido' },
     new: 'Nuova spesa',
@@ -339,6 +340,7 @@ const en: Resource = {
     empty: 'Everything that happens in the room will show up here.',
     more: 'Show earlier',
   },
+  egg: { close: 'Bye bunny! Tap to close' },
   expense: {
     calc: { add: 'Plus', subtract: 'Minus', multiply: 'Times', divide: 'Divided by', equals: 'Work out the total', invalid: 'Invalid calculation' },
     new: 'New expense',

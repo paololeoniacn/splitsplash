@@ -12,6 +12,8 @@ import { todayISO, useMoney } from '../lib/format';
 import { activityKey, expensesKey } from '../lib/useRoom';
 import { CATEGORY_ICONS } from './categoryIcon';
 import { MiniPortrait } from './Portrait';
+import { useEggWord } from '../lib/easterEgg';
+import { BunnyPop } from './BunnyPop';
 import { Sheet } from './Sheet';
 import { useToast } from './Toast';
 import { Button, Field, inputClass, Segmented } from './ui';
@@ -60,6 +62,9 @@ export function ExpenseSheet({
   const [to, setTo] = useState('');
   const [date, setDate] = useState(todayISO());
   const [note, setNote] = useState('');
+  const [bunny, setBunny] = useState(false);
+  useEggWord(title, () => setBunny(true));
+  useEggWord(note, () => setBunny(true));
   const [mode, setMode] = useState<SplitMode>('equal');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [values, setValues] = useState<Record<string, string>>({});
@@ -465,6 +470,7 @@ export function ExpenseSheet({
         )}
         <button type="submit" hidden />
       </form>
+      <BunnyPop open={bunny} onClose={() => setBunny(false)} />
     </Sheet>
   );
 }
