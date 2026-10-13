@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeBalances, simplifyDebts } from './balances';
 import { evaluateAmount, formatMoney, parseAmount } from './money';
-import { generatePassphrase, isLegacyPassphrase, isPassphraseShape, normalizePassphrase, PASSPHRASE_WORDS } from './passphrase';
+import { generatePassphrase, HABITAT_WORDS, isLegacyPassphrase, isPassphraseShape, normalizePassphrase, PASSPHRASE_WORDS } from './passphrase';
 import { allocate, splitExpense } from './split';
 
 describe('evaluateAmount', () => {
@@ -134,7 +134,9 @@ describe('balances', () => {
 
 describe('passphrase', () => {
   it('generates unique-word, normalized passphrases', () => {
-    expect(new Set(PASSPHRASE_WORDS).size).toBe(PASSPHRASE_WORDS.length);
+    const all = [...PASSPHRASE_WORDS, ...HABITAT_WORDS];
+    expect(new Set(all).size).toBe(all.length);
+    expect(all.every((w) => /^[a-z]+$/.test(w))).toBe(true);
     const p = generatePassphrase();
     expect(isPassphraseShape(p)).toBe(true);
     expect(normalizePassphrase(p)).toBe(p);
@@ -145,6 +147,12 @@ describe('passphrase', () => {
   it('still accepts legacy three-word passphrases but flags them', () => {
     expect(isPassphraseShape('volpe-koala-gufo-0042')).toBe(true);
     expect(isLegacyPassphrase('Volpe Koala Gufo 0042')).toBe(true);
+  });
+
+  it('produces URL-safe passphrases that survive a round trip through a link', () => {
+    const p = generatePassphrase();
+    expect(p).toMatch(/^[a-z0-9-]+$/);
+    expect(encodeURIComponent(p)).toBe(p);
   });
 
   it('normalizes case, accents and separators', () => {

@@ -182,6 +182,88 @@ export const PASSPHRASE_WORDS = [
   'pangolino',
 ] as const;
 
+/** Places animals live in. Mixed with the animals to widen the pool without losing the theme. */
+export const HABITAT_WORDS = [
+  'abisso',
+  'altopiano',
+  'alveare',
+  'atollo',
+  'baia',
+  'banchisa',
+  'barriera',
+  'brughiera',
+  'campo',
+  'canneto',
+  'canyon',
+  'cascata',
+  'caverna',
+  'collina',
+  'corallo',
+  'costa',
+  'cratere',
+  'crinale',
+  'delta',
+  'deserto',
+  'duna',
+  'estuario',
+  'faggeta',
+  'fattoria',
+  'fienile',
+  'fiordo',
+  'fiume',
+  'fondale',
+  'foresta',
+  'formicaio',
+  'frutteto',
+  'ghiacciaio',
+  'giungla',
+  'golfo',
+  'grotta',
+  'iceberg',
+  'isola',
+  'lago',
+  'laguna',
+  'macchia',
+  'mangrovia',
+  'mare',
+  'montagna',
+  'nido',
+  'oasi',
+  'oceano',
+  'orto',
+  'palude',
+  'pascolo',
+  'pianura',
+  'pineta',
+  'pollaio',
+  'prateria',
+  'prato',
+  'querceto',
+  'radura',
+  'risaia',
+  'ruscello',
+  'savana',
+  'scogliera',
+  'scoglio',
+  'sentiero',
+  'sorgente',
+  'spiaggia',
+  'stagno',
+  'stalla',
+  'steppa',
+  'taiga',
+  'tana',
+  'torrente',
+  'tundra',
+  'uliveto',
+  'valle',
+  'vetta',
+  'vigneto',
+  'vulcano',
+] as const;
+
+const ALL_WORDS: readonly string[] = [...PASSPHRASE_WORDS, ...HABITAT_WORDS];
+
 function randomInt(max: number): number {
   const limit = Math.floor(0x1_0000_0000 / max) * max;
   const buf = new Uint32Array(1);
@@ -193,9 +275,9 @@ function randomInt(max: number): number {
 
 export const PASSPHRASE_WORD_COUNT = 5;
 
-/** Five animals + four digits ≈ 51 bits (180⁵·10⁴); join endpoints are also rate limited per network. */
+/** Five words from animals + habitats and four digits ≈ 53 bits (258⁵·10⁴). Plain a–z/0–9/-, so it is URL-safe as is. */
 export function generatePassphrase(): string {
-  const words = Array.from({ length: PASSPHRASE_WORD_COUNT }, () => PASSPHRASE_WORDS[randomInt(PASSPHRASE_WORDS.length)]);
+  const words = Array.from({ length: PASSPHRASE_WORD_COUNT }, () => ALL_WORDS[randomInt(ALL_WORDS.length)]);
   const digits = String(randomInt(10000)).padStart(4, '0');
   return [...words, digits].join('-');
 }

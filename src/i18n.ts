@@ -67,8 +67,8 @@ const it = {
   join: {
     title: 'Entra in una room',
     passphrase: 'Passphrase',
-    passphrasePh: 'volpe-koala-gufo-orso-ape-1234',
-    passphraseHint: 'Animali e quattro cifre. Maiuscole e spazi non contano.',
+    passphrasePh: 'volpe-savana-gufo-laguna-riccio-0042',
+    passphraseHint: 'Animali, habitat e quattro cifre. Maiuscole e spazi non contano.',
     find: 'Cerca la room',
     whoAreYou: 'Chi sei in {{room}}?',
     pickExisting: 'Sei già nella lista? Tocca il tuo nome.',
@@ -294,8 +294,8 @@ const en: Resource = {
   join: {
     title: 'Join a room',
     passphrase: 'Passphrase',
-    passphrasePh: 'volpe-koala-gufo-orso-ape-1234',
-    passphraseHint: 'Animals and four digits. Case and spaces don’t matter.',
+    passphrasePh: 'volpe-savana-gufo-laguna-riccio-0042',
+    passphraseHint: 'Animals, habitats and four digits. Case and spaces don’t matter.',
     find: 'Find the room',
     whoAreYou: 'Who are you in {{room}}?',
     pickExisting: 'Already on the list? Tap your name.',
