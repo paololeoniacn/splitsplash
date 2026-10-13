@@ -71,3 +71,7 @@ Istanza attuale: **https://splitsplash.pages.dev** (anche https://splitsplash.pa
 `splitsplash.pages.dev` è un progetto Cloudflare Pages minimale (`pages/`) che inoltra ogni richiesta
 al Worker tramite service binding: il codice e il database restano uno solo. Va ripubblicato solo se
 cambia `pages/` (`npm run deploy:pages`); i normali deploy del Worker valgono anche per pages.dev.
+
+## Licenza
+
+SplitSplash è software libero, rilasciato con licenza [GNU AGPL-3.0](LICENSE): gratis, e lo sarà sempre. Chi ne pubblica una versione modificata come servizio online deve renderne disponibile il codice.
