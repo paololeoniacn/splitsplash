@@ -105,6 +105,11 @@ body {
   border-radius: 6px;
 }
 
+/* The big amount field shows focus through its underline instead. */
+.amount-field:focus-visible {
+  outline: none;
+}
+
 input,
 textarea,
 select {

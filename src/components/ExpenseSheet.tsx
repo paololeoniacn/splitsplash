@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CATEGORIES, type Category } from '../../shared/categories';
-import { parseAmount, toInputString } from '../../shared/money';
+import { evaluateAmount, isExpression, parseAmount, toInputString } from '../../shared/money';
 import { splitExpense, type SplitEntry, type SplitMode } from '../../shared/split';
 import type { Expense, Member } from '../../shared/types';
 import { errorKey } from '../i18n';
@@ -28,7 +28,16 @@ const num = (s: string) => {
   return s.trim() && Number.isFinite(v) && v >= 0 ? v : null;
 };
 
-export function ExpenseSheet({ open, onClose, roomId, currency, members, me, expense, draft }: {
+export function ExpenseSheet({
+  open,
+  onClose,
+  roomId,
+  currency,
+  members,
+  me,
+  expense,
+  draft,
+}: {
   open: boolean;
   onClose: () => void;
   roomId: string;
@@ -68,7 +77,7 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
       setDate(expense.date);
       setNote(expense.note);
       setMode(expense.kind === 'transfer' ? 'equal' : expense.splitMode);
-      setTo(expense.kind === 'transfer' ? expense.splits[0]?.memberId ?? '' : '');
+      setTo(expense.kind === 'transfer' ? (expense.splits[0]?.memberId ?? '') : '');
       setSelected(new Set(expense.splits.map((s) => s.memberId)));
       setValues(
         Object.fromEntries(
@@ -94,7 +103,27 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
     }
   }, [open, expense, draft, currency, me, members, t]);
 
-  const amount = parseAmount(amountStr, currency);
+  const amount = evaluateAmount(amountStr, currency);
+  const amountRef = useRef<HTMLInputElement>(null);
+  const caret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (caret.current === null) return;
+    amountRef.current?.setSelectionRange(caret.current, caret.current);
+    caret.current = null;
+  }, [amountStr]);
+  const insertOperator = (op: string) => {
+    const el = amountRef.current;
+    const start = el?.selectionStart ?? amountStr.length;
+    const end = el?.selectionEnd ?? amountStr.length;
+    const before = amountStr.slice(0, start).replace(/[+−×÷\s]+$/, '');
+    if (!before) return;
+    const next = before + op + amountStr.slice(end);
+    caret.current = before.length + 1;
+    setAmountStr(next);
+  };
+  const resolveAmount = () => {
+    if (isExpression(amountStr) && amount) setAmountStr(toInputString(amount, currency));
+  };
 
   const entries: SplitEntry[] | null = useMemo(() => {
     const ids = members.filter((m) => selected.has(m.id)).map((m) => m.id);
@@ -128,11 +157,15 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
     if (kind === 'transfer' || !entries || !amount) return null;
     if (mode === 'exact') {
       const diff = amount - entries.reduce((a, e) => a + e.value, 0);
-      return diff === 0 ? { ok: true, text: t('expense.balanced') } : { ok: false, text: diff > 0 ? t('expense.remaining', { amount: money(diff) }) : t('expense.over', { amount: money(-diff) }) };
+      return diff === 0
+        ? { ok: true, text: t('expense.balanced') }
+        : { ok: false, text: diff > 0 ? t('expense.remaining', { amount: money(diff) }) : t('expense.over', { amount: money(-diff) }) };
     }
     if (mode === 'percent') {
       const diff = 10000 - entries.reduce((a, e) => a + e.value, 0);
-      return diff === 0 ? { ok: true, text: t('expense.balanced') } : { ok: false, text: diff > 0 ? t('expense.percentLeft', { value: diff / 100 }) : t('expense.percentOver', { value: -diff / 100 }) };
+      return diff === 0
+        ? { ok: true, text: t('expense.balanced') }
+        : { ok: false, text: diff > 0 ? t('expense.percentLeft', { value: diff / 100 }) : t('expense.percentOver', { value: -diff / 100 }) };
     }
     if (mode === 'equal' && entries.length) return { ok: true, text: t('expense.each', { amount: money(Math.floor(amount / entries.length)) }) };
     return null;
@@ -230,25 +263,79 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
             {t('expense.amount')}
           </label>
           <div className="mt-1.5 flex items-baseline gap-2 border-b-2 border-ink pb-1 focus-within:border-owe">
-            <span className="text-2xl font-semibold text-ink-2">{new Intl.NumberFormat(undefined, { style: 'currency', currency }).formatToParts(0).find((p) => p.type === 'currency')?.value}</span>
+            <span className="text-2xl font-semibold text-ink-2">
+              {new Intl.NumberFormat(undefined, { style: 'currency', currency }).formatToParts(0).find((p) => p.type === 'currency')?.value}
+            </span>
             <input
               id="amount"
               inputMode="decimal"
               autoComplete="off"
               placeholder="0,00"
               value={amountStr}
+              ref={amountRef}
               onChange={(e) => setAmountStr(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === '=') (e.preventDefault(), resolveAmount());
+              }}
               autoFocus={!expense}
               aria-invalid={submitted && !amount ? true : undefined}
-              className="num w-full min-w-0 bg-transparent text-[2.75rem] leading-none font-bold tracking-[-0.03em] outline-none placeholder:text-ink-2/40"
+              className="amount-field num w-full min-w-0 bg-transparent text-[2.75rem] leading-none font-bold tracking-[-0.03em] outline-none placeholder:text-ink-2/40"
             />
           </div>
-          {submitted && !amount && <p className="mt-1.5 text-sm text-owe" role="alert">{t('errors.amount')}</p>}
+          <div className="mt-2.5 flex items-center gap-1.5">
+            {(
+              [
+                ['+', 'add'],
+                ['−', 'subtract'],
+                ['×', 'multiply'],
+                ['÷', 'divide'],
+              ] as const
+            ).map(([op, key]) => (
+              <button
+                key={op}
+                type="button"
+                aria-label={t(`expense.calc.${key}`)}
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={() => insertOperator(op)}
+                className="grid size-10 place-items-center rounded-full text-xl font-semibold ring-1 ring-rule transition-colors hover:bg-ink/5 active:bg-ink/10"
+              >
+                {op}
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-label={t('expense.calc.equals')}
+              onPointerDown={(e) => e.preventDefault()}
+              onClick={resolveAmount}
+              disabled={!isExpression(amountStr) || !amount}
+              className="grid size-10 place-items-center rounded-full text-xl font-semibold ring-1 ring-rule transition-colors hover:bg-ink/5 active:bg-ink/10 disabled:opacity-35"
+            >
+              =
+            </button>
+            {isExpression(amountStr) && (
+              <output htmlFor="amount" aria-live="polite" className={`num ml-auto truncate pl-2 text-lg font-bold ${amount ? 'text-ink' : 'text-owe'}`}>
+                {amount ? `= ${money(amount)}` : t('expense.calc.invalid')}
+              </output>
+            )}
+          </div>
+          {submitted && !amount && (
+            <p className="mt-1.5 text-sm text-owe" role="alert">
+              {t('errors.amount')}
+            </p>
+          )}
         </div>
 
         {kind === 'expense' && (
           <Field label={t('expense.title')} id="title" error={submitted && !title.trim() ? t('errors.required') : undefined}>
-            <input id="title" className={inputClass} placeholder={t('expense.titlePh')} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={80} aria-invalid={submitted && !title.trim() ? true : undefined} />
+            <input
+              id="title"
+              className={inputClass}
+              placeholder={t('expense.titlePh')}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={80}
+              aria-invalid={submitted && !title.trim() ? true : undefined}
+            />
           </Field>
         )}
 
@@ -260,7 +347,10 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
                 const Icon = CATEGORY_ICONS[c];
                 const on = c === category;
                 return (
-                  <label key={c} className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold ring-1 transition-colors has-focus-visible:outline-2 has-focus-visible:outline-ink ${on ? 'bg-ink text-paper ring-ink' : 'ring-rule hover:ring-ink/40'}`}>
+                  <label
+                    key={c}
+                    className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold ring-1 transition-colors has-focus-visible:outline-2 has-focus-visible:outline-ink ${on ? 'bg-ink text-paper ring-ink' : 'ring-rule hover:ring-ink/40'}`}
+                  >
                     <input type="radio" name="category" className="sr-only" checked={on} onChange={() => setCategory(c)} />
                     <Icon className="size-4" aria-hidden="true" />
                     {t(`expense.categories.${c}`)}
@@ -271,7 +361,14 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
           </fieldset>
         )}
 
-        <MemberChoice label={kind === 'transfer' ? t('expense.from') : t('expense.paidBy')} members={members} me={me} value={paidBy} onChange={setPaidBy} name="paidBy" />
+        <MemberChoice
+          label={kind === 'transfer' ? t('expense.from') : t('expense.paidBy')}
+          members={members}
+          me={me}
+          value={paidBy}
+          onChange={setPaidBy}
+          name="paidBy"
+        />
 
         {kind === 'transfer' ? (
           <>
@@ -289,7 +386,11 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
             />
             <p className="text-sm text-ink-2">{t(`expense.modeHelp.${mode}`)}</p>
             <div className="flex justify-end gap-1 text-sm">
-              <button type="button" className="rounded-full px-2.5 py-1 font-semibold text-ink-2 hover:text-ink" onClick={() => setSelected(new Set(members.map((m) => m.id)))}>
+              <button
+                type="button"
+                className="rounded-full px-2.5 py-1 font-semibold text-ink-2 hover:text-ink"
+                onClick={() => setSelected(new Set(members.map((m) => m.id)))}
+              >
                 {t('expense.all')}
               </button>
               <button type="button" className="rounded-full px-2.5 py-1 font-semibold text-ink-2 hover:text-ink" onClick={() => setSelected(new Set())}>
@@ -332,12 +433,18 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
                         {mode === 'percent' && <span className="text-sm text-ink-2">%</span>}
                       </span>
                     )}
-                    <span className={`num w-20 text-right text-sm ${on ? 'font-semibold' : 'text-ink-2'}`}>{on && preview?.has(m.id) ? money(preview.get(m.id)!) : '—'}</span>
+                    <span className={`num w-20 text-right text-sm ${on ? 'font-semibold' : 'text-ink-2'}`}>
+                      {on && preview?.has(m.id) ? money(preview.get(m.id)!) : '—'}
+                    </span>
                   </li>
                 );
               })}
             </ul>
-            {balanceHint && <p className={`text-sm font-semibold ${balanceHint.ok ? 'text-owed' : 'text-owe'}`} role="status">{balanceHint.text}</p>}
+            {balanceHint && (
+              <p className={`text-sm font-semibold ${balanceHint.ok ? 'text-owed' : 'text-owe'}`} role="status">
+                {balanceHint.text}
+              </p>
+            )}
             {submitted && selected.size === 0 && <p className="text-sm text-owe">{t('errors.no_participants')}</p>}
           </fieldset>
         )}
@@ -362,7 +469,21 @@ export function ExpenseSheet({ open, onClose, roomId, currency, members, me, exp
   );
 }
 
-function MemberChoice({ label, members, me, value, onChange, name }: { label: string; members: Member[]; me: string; value: string; onChange: (id: string) => void; name: string }) {
+function MemberChoice({
+  label,
+  members,
+  me,
+  value,
+  onChange,
+  name,
+}: {
+  label: string;
+  members: Member[];
+  me: string;
+  value: string;
+  onChange: (id: string) => void;
+  name: string;
+}) {
   const { t } = useTranslation();
   return (
     <fieldset>
@@ -371,7 +492,10 @@ function MemberChoice({ label, members, me, value, onChange, name }: { label: st
         {members.map((m) => {
           const on = m.id === value;
           return (
-            <label key={m.id} className={`ink-${m.ink} flex shrink-0 cursor-pointer items-center gap-2 rounded-full py-1.5 pr-4 pl-1.5 text-sm font-semibold ring-1 transition-all has-focus-visible:outline-2 has-focus-visible:outline-ink ${on ? 'bg-wash text-on-wash ring-2 ring-line' : 'ring-rule hover:ring-ink/40'}`}>
+            <label
+              key={m.id}
+              className={`ink-${m.ink} flex shrink-0 cursor-pointer items-center gap-2 rounded-full py-1.5 pr-4 pl-1.5 text-sm font-semibold ring-1 transition-all has-focus-visible:outline-2 has-focus-visible:outline-ink ${on ? 'bg-wash text-on-wash ring-2 ring-line' : 'ring-rule hover:ring-ink/40'}`}
+            >
               <input type="radio" name={name} className="sr-only" checked={on} onChange={() => onChange(m.id)} />
               <MiniPortrait animal={m.animal} ink={m.ink} size={28} />
               {m.id === me ? t('room.youShort') : m.name}

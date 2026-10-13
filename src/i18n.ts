@@ -129,6 +129,7 @@ const it = {
     more: 'Mostra precedenti',
   },
   expense: {
+    calc: { add: 'Più', subtract: 'Meno', multiply: 'Per', divide: 'Diviso', equals: 'Calcola il totale', invalid: 'Calcolo non valido' },
     new: 'Nuova spesa',
     edit: 'Modifica spesa',
     newTransfer: 'Nuovo rimborso',
@@ -339,6 +340,7 @@ const en: Resource = {
     more: 'Show earlier',
   },
   expense: {
+    calc: { add: 'Plus', subtract: 'Minus', multiply: 'Times', divide: 'Divided by', equals: 'Work out the total', invalid: 'Invalid calculation' },
     new: 'New expense',
     edit: 'Edit expense',
     newTransfer: 'New reimbursement',
