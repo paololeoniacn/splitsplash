@@ -1,10 +1,15 @@
 import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vite';
+
+const commit = process.env.GITHUB_SHA?.slice(0, 7) ?? execSync('git rev-parse --short HEAD').toString().trim();
+const stamp = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Rome' }).slice(0, 16);
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(`${stamp} · ${commit}`) },
   plugins: [
     react(),
     tailwindcss(),

@@ -18,6 +18,7 @@ import { api, ApiError } from '../lib/api';
 import { useMoney } from '../lib/format';
 import { forgetRoom, tokenFor, touchRoom } from '../lib/storage';
 import { activityKey, roomKey, useExpenses, useRoom } from '../lib/useRoom';
+import { APP_VERSION } from '../version';
 import { isLegacyPassphrase } from '../../shared/passphrase';
 
 export interface RoomCtx {
@@ -262,6 +263,7 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
               </button>
             </li>
           ))}
+          <li className="microprint px-3 pt-3 text-ink-2/70">v {APP_VERSION}</li>
         </ul>
       )}
       {view !== 'main' && (

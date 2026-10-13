@@ -10,6 +10,7 @@ import { Button } from '../components/ui';
 import { Wordmark } from '../components/Wordmark';
 import { useMoney } from '../lib/format';
 import { savedRooms } from '../lib/storage';
+import { APP_VERSION } from '../version';
 import { useMemo } from 'react';
 
 const SPECIMEN = [
@@ -83,7 +84,8 @@ export default function Landing() {
           </div>
         ))}
       </section>
-      <p className="pb-8 text-sm text-ink-2">{t('landing.privacy')}</p>
+      <p className="text-sm text-ink-2">{t('landing.privacy')}</p>
+      <p className="microprint pt-4 pb-8 text-ink-2/70">v {APP_VERSION}</p>
     </div>
   );
 }
@@ -113,14 +115,18 @@ function SpecimenNote({ serial, money }: { serial: string; money: (n: number, o?
         </ul>
 
         <div className="mt-6 flex items-center gap-3 rounded-xl bg-owe-wash px-4 py-3 text-[15px]">
-          <span className="text-xl" aria-hidden="true">🐙</span>
+          <span className="text-xl" aria-hidden="true">
+            🐙
+          </span>
           <span className="flex-1 font-medium">
             Marco <span className="text-ink-2">{t('balances.pays')}</span> Giulia
           </span>
           <span className="num font-bold text-owe">{money(5210)}</span>
         </div>
         <div className="mt-2 flex items-center gap-3 rounded-xl bg-owe-wash px-4 py-3 text-[15px]">
-          <span className="text-xl" aria-hidden="true">🦦</span>
+          <span className="text-xl" aria-hidden="true">
+            🦦
+          </span>
           <span className="flex-1 font-medium">
             Sara <span className="text-ink-2">{t('balances.pays')}</span> Giulia
           </span>
