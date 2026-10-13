@@ -203,6 +203,7 @@ const it = {
   },
   errors: {
     room_not_found: 'Nessuna room con questa passphrase. Controlla le parole e le cifre.',
+    too_many_failures: 'Troppe passphrase sbagliate da questa rete. Riprova tra un’ora.',
     rate_limited: 'Troppi tentativi. Aspetta un minuto e riprova.',
     invalid_input: 'Controlla i campi evidenziati.',
     exact_mismatch: 'Gli importi non tornano con il totale.',
@@ -430,6 +431,7 @@ const en: Resource = {
   },
   errors: {
     room_not_found: 'No room with this passphrase. Check the words and digits.',
+    too_many_failures: 'Too many wrong passphrases from this network. Try again in an hour.',
     rate_limited: 'Too many attempts. Wait a minute and try again.',
     invalid_input: 'Check the highlighted fields.',
     exact_mismatch: 'The amounts don’t add up to the total.',

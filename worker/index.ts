@@ -7,7 +7,7 @@ import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput, rot
 import { SplitError, splitExpense } from '../shared/split';
 import type { Activity, ActivityType, Expense, Member, Room, RoomState } from '../shared/types';
 import { networkKeys } from './net';
-import { decrypt, encrypt, newId, passphraseHash, randomToken, tokenHash } from './crypto';
+import { decrypt, encrypt, newId, passphraseHash, randomToken, sha256, tokenHash } from './crypto';
 
 type Auth = { memberId: string; roomId: string; tokenHash: string };
 type App = { Bindings: Env; Variables: { auth: Auth } };
@@ -17,6 +17,9 @@ const app = new Hono<App>().basePath('/api');
 const MAX_MEMBERS = 50;
 const MAX_EXPENSES = 5000;
 const TOKEN_IDLE_MS = 90 * 24 * 60 * 60 * 1000;
+// Wrong passphrases allowed per hour, per address and per wider network, before lookups are refused.
+const FAILURE_WINDOW_MS = 60 * 60 * 1000;
+const MAX_FAILURES = { host: 12, wide: 40 } as const;
 
 app.use(async (c, next) => {
   await next();
@@ -68,12 +71,38 @@ async function issueToken(db: D1Database, memberId: string) {
   };
 }
 
+async function failureKeys(c: Context<App>) {
+  const { host, wide } = networkKeys(c.req.header('cf-connecting-ip') ?? 'local');
+  const bucket = Math.floor(Date.now() / FAILURE_WINDOW_MS);
+  // Hashed so the table never holds addresses.
+  return [
+    { key: await sha256(`fail:${pepper(c)}:host:${host}`), bucket, max: MAX_FAILURES.host },
+    { key: await sha256(`fail:${pepper(c)}:wide:${wide}`), bucket, max: MAX_FAILURES.wide },
+  ];
+}
+
 async function roomByPassphrase(c: Context<App>, passphrase: string) {
+  const db = c.env.DB;
+  const keys = await failureKeys(c);
+  const counts = await db.batch(keys.map((k) => db.prepare('SELECT count FROM join_failures WHERE key = ? AND bucket = ?').bind(k.key, k.bucket)));
+  if (keys.some((k, i) => ((counts[i].results[0] as { count: number } | undefined)?.count ?? 0) >= k.max)) fail(429, 'too_many_failures');
+
   const hash = await passphraseHash(normalizePassphrase(passphrase), pepper(c));
-  const room = await c.env.DB.prepare('SELECT id, name, currency, created_at FROM rooms WHERE passphrase_hash = ?')
+  const room = await db
+    .prepare('SELECT id, name, currency, created_at FROM rooms WHERE passphrase_hash = ?')
     .bind(hash)
     .first<{ id: string; name: string; currency: string; created_at: number }>();
-  return room ?? fail(404, 'room_not_found');
+  if (room) return room;
+
+  await db.batch([
+    ...keys.map((k) =>
+      db
+        .prepare('INSERT INTO join_failures (key, bucket, count) VALUES (?, ?, 1) ON CONFLICT (key, bucket) DO UPDATE SET count = count + 1')
+        .bind(k.key, k.bucket),
+    ),
+    db.prepare('DELETE FROM join_failures WHERE bucket < ?').bind(keys[0].bucket - 1),
+  ]);
+  return fail(404, 'room_not_found');
 }
 
 async function listMembers(db: D1Database, roomId: string): Promise<Member[]> {

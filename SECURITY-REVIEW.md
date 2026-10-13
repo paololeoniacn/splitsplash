@@ -9,7 +9,7 @@ Tutti i finding sono stati corretti e pubblicati in produzione. I dati esistenti
 
 | # | Correzione |
 |---|------------|
-| 1 | Le nuove passphrase hanno 5 animali + 4 cifre (~51 bit invece di ~36). Il rate limit ora agisce su tre livelli: per rete (IPv6 /64, IPv4 singolo indirizzo) 10/min, per blocco (/48 o /24) 30/min, globale 600/min. Le vecchie passphrase a 3 parole funzionano ancora, ma la UI le segnala come "formato vecchio" e invita a rigenerarle. |
+| 1 | Le nuove passphrase hanno 5 parole tra animali e habitat + 4 cifre (~53 bit invece di ~36). In più, dopo 12 tentativi sbagliati all'ora per indirizzo (40 per rete) il join si blocca fino all'ora successiva. Il rate limit ora agisce su tre livelli: per rete (IPv6 /64, IPv4 singolo indirizzo) 10/min, per blocco (/48 o /24) 30/min, globale 600/min. Le vecchie passphrase a 3 parole funzionano ancora, ma la UI le segnala come "formato vecchio" e invita a rigenerarle. |
 | 2 | I token scadono dopo 90 giorni di inattività e vengono cancellati. Quando si rigenera la passphrase si può scegliere "Disconnetti anche tutti gli altri dispositivi", che revoca tutti i token della room tranne il proprio. |
 | 3 | Su tutte le risposte API: `nosniff`, `no-store`, `Referrer-Policy`, `X-Frame-Options`. Sugli asset statici (`public/_headers`): CSP stretta, HSTS, `Permissions-Policy`, COOP. |
 | Nota | Limite di 50 membri e 5000 spese per room (`room_full`, `too_many_expenses`). |

@@ -59,6 +59,7 @@ e `CLOUDFLARE_ACCOUNT_ID`.
   Da menu si può generare una nuova passphrase (la vecchia smette di funzionare) e, volendo,
   disconnettere tutti gli altri dispositivi.
 - Passphrase: 5 parole tra animali e habitat + 4 cifre (es. `volpe-savana-gufo-laguna-riccio-0042`, ~53 bit), solo a–z/0–9/- quindi sicura negli URL. Quelle vecchie a 3 animali restano valide ma vengono segnalate.
+- Blocco brute-force: dopo 12 passphrase sbagliate in un'ora da un indirizzo (40 dalla stessa rete /48 o /24) il lookup viene rifiutato per il resto dell'ora (tabella `join_failures`, chiavi hashate).
 - I token dei dispositivi scadono dopo 90 giorni di inattività. Limiti: 50 membri e 5000 spese per room.
 - Header di sicurezza: CSP, HSTS ecc. in `public/_headers`; `no-store`/`nosniff` sulle API.
   Dettagli in `SECURITY-REVIEW.md`.
