@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeBalances, simplifyDebts } from './balances';
 import { formatMoney, parseAmount } from './money';
-import { generatePassphrase, isPassphraseShape, normalizePassphrase, PASSPHRASE_WORDS } from './passphrase';
+import { generatePassphrase, isLegacyPassphrase, isPassphraseShape, normalizePassphrase, PASSPHRASE_WORDS } from './passphrase';
 import { allocate, splitExpense } from './split';
 
 describe('parseAmount', () => {
@@ -74,6 +74,13 @@ describe('passphrase', () => {
     const p = generatePassphrase();
     expect(isPassphraseShape(p)).toBe(true);
     expect(normalizePassphrase(p)).toBe(p);
+    expect(p.split('-')).toHaveLength(6);
+    expect(isLegacyPassphrase(p)).toBe(false);
+  });
+
+  it('still accepts legacy three-word passphrases but flags them', () => {
+    expect(isPassphraseShape('volpe-koala-gufo-0042')).toBe(true);
+    expect(isLegacyPassphrase('Volpe Koala Gufo 0042')).toBe(true);
   });
 
   it('normalizes case, accents and separators', () => {

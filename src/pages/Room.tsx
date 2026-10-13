@@ -18,6 +18,7 @@ import { api, ApiError } from '../lib/api';
 import { useMoney } from '../lib/format';
 import { forgetRoom, tokenFor, touchRoom } from '../lib/storage';
 import { activityKey, roomKey, useExpenses, useRoom } from '../lib/useRoom';
+import { isLegacyPassphrase } from '../../shared/passphrase';
 
 export interface RoomCtx {
   state: RoomState;
@@ -45,7 +46,11 @@ export default function Room() {
   }, [room.data, roomId]);
 
   const balances = useMemo(
-    () => computeBalances(room.data?.members.map((m) => m.id) ?? [], (expenses.data ?? []).map((e) => ({ kind: e.kind, amount: e.amount, paidBy: e.paidBy, splits: e.splits }))),
+    () =>
+      computeBalances(
+        room.data?.members.map((m) => m.id) ?? [],
+        (expenses.data ?? []).map((e) => ({ kind: e.kind, amount: e.amount, paidBy: e.paidBy, splits: e.splits })),
+      ),
     [room.data, expenses.data],
   );
 
@@ -86,7 +91,10 @@ export default function Room() {
             <ArrowLeft className="size-5" aria-hidden="true" />
           </Link>
           <div className="flex items-center gap-1">
-            <Link to={`/r/${roomId}/invite`} className="inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-rule transition-colors hover:ring-ink/40">
+            <Link
+              to={`/r/${roomId}/invite`}
+              className="inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-rule transition-colors hover:ring-ink/40"
+            >
               <UserPlus className="size-4" aria-hidden="true" />
               {t('room.invite')}
             </Link>
@@ -106,9 +114,16 @@ export default function Room() {
           </div>
         </div>
         {room.data.passphrase && (
-          <Link to={`/r/${roomId}/invite`} className="mt-2 inline-flex items-center gap-2 rounded-md text-owe transition-opacity hover:opacity-75" aria-label={t('room.invite')}>
+          <Link
+            to={`/r/${roomId}/invite`}
+            className="mt-2 inline-flex items-center gap-2 rounded-md text-owe transition-opacity hover:opacity-75"
+            aria-label={t('room.invite')}
+          >
             <span className="microprint text-ink-2">{t('invite.serial')}</span>
             <Serial value={room.data.passphrase} className="text-sm font-semibold" />
+            {isLegacyPassphrase(room.data.passphrase) && (
+              <span className="microprint rounded-full px-2 py-0.5 ring-1 ring-rule">{t('invite.legacyShort')}</span>
+            )}
           </Link>
         )}
         <div className={`ink-${byId.get(me)?.ink ?? 0} mt-3 text-line/55`}>
@@ -124,14 +139,19 @@ export default function Room() {
               <li key={m.id} className="flex w-[5.75rem] shrink-0 flex-col items-center text-center">
                 <Portrait animal={m.animal} ink={m.ink} size={68} />
                 <span className="mt-1.5 w-full truncate text-sm font-semibold">{m.id === me ? t('room.youShort') : m.name}</span>
-                <span className={`num text-[15px] font-bold ${net > 0 ? 'text-owed' : net < 0 ? 'text-owe' : 'text-ink-2'}`}>{net === 0 ? t('room.settled') : money(net, { sign: true })}</span>
+                <span className={`num text-[15px] font-bold ${net > 0 ? 'text-owed' : net < 0 ? 'text-owe' : 'text-ink-2'}`}>
+                  {net === 0 ? t('room.settled') : money(net, { sign: true })}
+                </span>
               </li>
             );
           })}
         </ul>
       </section>
 
-      <nav className="sticky top-[calc(3rem+env(safe-area-inset-top))] z-10 mt-2 border-b border-rule bg-paper/92 px-5 backdrop-blur-md" aria-label={t('room.menu')}>
+      <nav
+        className="sticky top-[calc(3rem+env(safe-area-inset-top))] z-10 mt-2 border-b border-rule bg-paper/92 px-5 backdrop-blur-md"
+        aria-label={t('room.menu')}
+      >
         <ul className="flex gap-6">
           {(
             [
@@ -144,7 +164,9 @@ export default function Room() {
               <NavLink
                 to={path}
                 end
-                className={({ isActive }) => `relative inline-block py-3 text-[15px] font-semibold transition-colors ${isActive ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-full after:bg-ink' : 'text-ink-2 hover:text-ink'}`}
+                className={({ isActive }) =>
+                  `relative inline-block py-3 text-[15px] font-semibold transition-colors ${isActive ? 'text-ink after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-full after:bg-ink' : 'text-ink-2 hover:text-ink'}`
+                }
               >
                 {t(`room.tabs.${key}`)}
               </NavLink>
@@ -158,13 +180,26 @@ export default function Room() {
       </main>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-        <Button size="lg" className="pointer-events-auto shadow-[0_14px_30px_-10px_rgb(16_32_27/0.65)]" onClick={() => setSheet({ draft: { kind: 'expense' } })}>
+        <Button
+          size="lg"
+          className="pointer-events-auto shadow-[0_14px_30px_-10px_rgb(16_32_27/0.65)]"
+          onClick={() => setSheet({ draft: { kind: 'expense' } })}
+        >
           <Plus className="size-5" aria-hidden="true" />
           {t('room.add')}
         </Button>
       </div>
 
-      <ExpenseSheet open={!!sheet} onClose={() => setSheet(null)} roomId={roomId} currency={r.currency} members={members} me={me} expense={sheet?.expense} draft={sheet?.draft} />
+      <ExpenseSheet
+        open={!!sheet}
+        onClose={() => setSheet(null)}
+        roomId={roomId}
+        currency={r.currency}
+        members={members}
+        me={me}
+        expense={sheet?.expense}
+        draft={sheet?.draft}
+      />
       <RoomMenu open={menu} onClose={() => setMenu(false)} roomId={roomId} state={room.data} />
     </div>
   );
@@ -218,7 +253,10 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
             { icon: LogOut, label: t('menu.leave'), run: leave, danger: true },
           ].map((item) => (
             <li key={item.label}>
-              <button onClick={item.run} className={`flex w-full items-center gap-3 rounded-xl px-3 py-3.5 text-left font-semibold transition-colors hover:bg-ink/5 ${item.danger ? 'text-owe' : ''}`}>
+              <button
+                onClick={item.run}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3.5 text-left font-semibold transition-colors hover:bg-ink/5 ${item.danger ? 'text-owe' : ''}`}
+              >
                 <item.icon className="size-5" aria-hidden="true" />
                 {item.label}
               </button>

@@ -9,7 +9,9 @@ import { Serial } from '../components/Serial';
 import { FormShell } from '../components/Shell';
 import { useToast } from '../components/Toast';
 import { Button } from '../components/ui';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
+import { errorKey } from '../i18n';
+import { isLegacyPassphrase } from '../../shared/passphrase';
 import { tokenFor } from '../lib/storage';
 import { roomKey, useRoom } from '../lib/useRoom';
 
@@ -25,6 +27,8 @@ export default function Invite() {
   const [copied, setCopied] = useState(false);
   const [qr, setQr] = useState('');
   const [minted, setMinted] = useState(isNew);
+  const [confirming, setConfirming] = useState(false);
+  const [signOutOthers, setSignOutOthers] = useState(false);
 
   const passphrase = room.data?.passphrase ?? '';
   const link = `${location.origin}/join#${passphrase}`;
@@ -36,9 +40,11 @@ export default function Invite() {
   }, [link, passphrase]);
 
   const rotate = useMutation({
-    mutationFn: () => api.rotatePassphrase(roomId),
+    mutationFn: () => api.rotatePassphrase(roomId, signOutOthers),
     onSuccess: () => {
       setMinted(true);
+      setConfirming(false);
+      setSignOutOthers(false);
       void qc.invalidateQueries({ queryKey: roomKey(roomId) });
       toast({ text: t('invite.rotated') });
     },
@@ -78,7 +84,13 @@ export default function Invite() {
               {copied ? t('invite.copied') : t('invite.copy')}
             </Button>
             {'share' in navigator && (
-              <Button variant="secondary" disabled={!passphrase} onClick={() => navigator.share({ title: 'SplitSplash', text: t('invite.shareText', { room: room.data?.room.name, passphrase }), url: link }).catch(() => {})}>
+              <Button
+                variant="secondary"
+                disabled={!passphrase}
+                onClick={() =>
+                  navigator.share({ title: 'SplitSplash', text: t('invite.shareText', { room: room.data?.room.name, passphrase }), url: link }).catch(() => {})
+                }
+              >
                 <Share2 className="size-4" aria-hidden="true" />
                 {t('invite.share')}
               </Button>
@@ -100,11 +112,45 @@ export default function Invite() {
           {t('invite.enter')}
           <ArrowRight className="size-5" aria-hidden="true" />
         </Button>
-        {!isNew && (
-          <Button variant="ghost" loading={rotate.isPending} onClick={() => confirm(t('invite.rotateConfirm')) && rotate.mutate()}>
+        {!isNew && passphrase && isLegacyPassphrase(passphrase) && !confirming && (
+          <p className="mt-2 rounded-xl px-4 py-3 text-sm text-ink-2 ring-1 ring-rule">{t('invite.legacy')}</p>
+        )}
+        {!isNew && !confirming && (
+          <Button variant="ghost" onClick={() => setConfirming(true)}>
             <RefreshCw className="size-4" aria-hidden="true" />
             {t('invite.rotate')}
           </Button>
+        )}
+        {!isNew && confirming && (
+          <div className="mt-2 grid gap-4 rounded-xl px-5 py-4 ring-1 ring-rule" role="group" aria-label={t('invite.rotate')}>
+            <p className="font-semibold">{t('invite.rotateConfirm')}</p>
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-5 shrink-0 accent-[var(--ink)]"
+                checked={signOutOthers}
+                onChange={(e) => setSignOutOthers(e.target.checked)}
+              />
+              <span>
+                <span className="block font-medium text-ink">{t('invite.rotateSignOut')}</span>
+                <span className="block text-ink-2">{t('invite.rotateSignOutHint')}</span>
+              </span>
+            </label>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button variant="ghost" onClick={() => setConfirming(false)} disabled={rotate.isPending}>
+                {t('invite.cancel')}
+              </Button>
+              <Button variant="primary" loading={rotate.isPending} onClick={() => rotate.mutate()}>
+                <RefreshCw className="size-4" aria-hidden="true" />
+                {t('invite.rotateGo')}
+              </Button>
+            </div>
+            {rotate.error && (
+              <p className="text-sm text-owe" role="alert">
+                {t(errorKey((rotate.error as ApiError).code ?? 'generic'))}
+              </p>
+            )}
+          </div>
         )}
       </div>
     </FormShell>

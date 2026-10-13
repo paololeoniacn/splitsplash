@@ -3,7 +3,10 @@ import type { Activity, Expense, Member, RoomState } from '../../shared/types';
 import { forgetRoom, tokenFor } from './storage';
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string) {
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
     super(code);
   }
 }
@@ -45,7 +48,8 @@ export const api = {
     request<{ roomId: string; token: string }>('/join', { method: 'POST', body: json(body) }),
 
   room: (roomId: string) => request<RoomState>('/room', { roomId }),
-  rotatePassphrase: (roomId: string) => request<{ passphrase: string }>('/room/passphrase', { method: 'POST', roomId }),
+  rotatePassphrase: (roomId: string, signOutOthers: boolean) =>
+    request<{ passphrase: string }>('/room/passphrase', { method: 'POST', body: json({ signOutOthers }), roomId }),
   addMember: (roomId: string, body: { name: string; animal: string }) => request<{ id: string }>('/room/members', { method: 'POST', body: json(body), roomId }),
   updateMe: (roomId: string, body: { name: string; animal: string }) => request('/room/me', { method: 'PATCH', body: json(body), roomId }),
   leave: (roomId: string) => request('/room/leave', { method: 'POST', roomId }),

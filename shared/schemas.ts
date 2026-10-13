@@ -13,6 +13,8 @@ export const createRoomInput = z.object({
   member: memberInput,
 });
 
+export const rotateInput = z.object({ signOutOthers: z.boolean().optional() });
+
 export const lookupInput = z.object({ passphrase: z.string().min(1).max(120) });
 
 export const joinInput = z.union([
@@ -30,7 +32,10 @@ export const expenseInput = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   split: z.object({
     mode: z.enum(['equal', 'exact', 'shares', 'percent']),
-    entries: z.array(z.object({ memberId: z.string().min(1), value: z.number().nonnegative() })).min(1).max(100),
+    entries: z
+      .array(z.object({ memberId: z.string().min(1), value: z.number().nonnegative() }))
+      .min(1)
+      .max(100),
   }),
 });
 

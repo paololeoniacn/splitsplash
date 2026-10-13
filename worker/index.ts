@@ -3,17 +3,30 @@ import { HTTPException } from 'hono/http-exception';
 import type { z } from 'zod';
 import { INK_COUNT } from '../shared/animals';
 import { generatePassphrase, normalizePassphrase } from '../shared/passphrase';
-import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput } from '../shared/schemas';
+import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput, rotateInput } from '../shared/schemas';
 import { SplitError, splitExpense } from '../shared/split';
 import type { Activity, ActivityType, Expense, Member, Room, RoomState } from '../shared/types';
+import { networkKeys } from './net';
 import { decrypt, encrypt, newId, passphraseHash, randomToken, tokenHash } from './crypto';
 
-type Auth = { memberId: string; roomId: string };
+type Auth = { memberId: string; roomId: string; tokenHash: string };
 type App = { Bindings: Env; Variables: { auth: Auth } };
 
 const app = new Hono<App>().basePath('/api');
 
-const fail = (status: 400 | 401 | 403 | 404 | 409 | 429, code: string): never => {
+const MAX_MEMBERS = 50;
+const MAX_EXPENSES = 5000;
+const TOKEN_IDLE_MS = 90 * 24 * 60 * 60 * 1000;
+
+app.use(async (c, next) => {
+  await next();
+  c.header('Cache-Control', 'no-store');
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('Referrer-Policy', 'no-referrer');
+  c.header('X-Frame-Options', 'DENY');
+});
+
+const fail = (status: 400 | 401 | 403 | 404 | 409 | 429 | 500, code: string): never => {
   throw new HTTPException(status, { res: Response.json({ error: code }, { status }) });
 };
 
@@ -25,12 +38,18 @@ async function body<T extends z.ZodType>(c: Context<App>, schema: T): Promise<z.
 }
 
 async function rateLimit(c: Context<App>) {
-  const key = c.req.header('cf-connecting-ip') ?? 'local';
-  const limiter = c.env.JOIN_LIMITER;
-  if (limiter && !(await limiter.limit({ key })).success) fail(429, 'rate_limited');
+  const { host, wide } = networkKeys(c.req.header('cf-connecting-ip') ?? 'local');
+  const checks: [RateLimit | undefined, string][] = [
+    [c.env.JOIN_LIMITER, host],
+    [c.env.NETWORK_LIMITER, wide],
+    [c.env.GLOBAL_LIMITER, 'global'],
+  ];
+  for (const [limiter, key] of checks) {
+    if (limiter && !(await limiter.limit({ key })).success) fail(429, 'rate_limited');
+  }
 }
 
-const pepper = (c: Context<App>) => c.env.PEPPER || fail(400, 'server_misconfigured');
+const pepper = (c: Context<App>) => c.env.PEPPER || fail(500, 'server_misconfigured');
 
 async function logActivity(db: D1Database, roomId: string, memberId: string | null, type: ActivityType, payload: Record<string, unknown> = {}) {
   return db
@@ -43,13 +62,17 @@ async function issueToken(db: D1Database, memberId: string) {
   const now = Date.now();
   return {
     token,
-    stmt: db.prepare('INSERT INTO member_tokens (token_hash, member_id, created_at, last_seen_at) VALUES (?, ?, ?, ?)').bind(await tokenHash(token), memberId, now, now),
+    stmt: db
+      .prepare('INSERT INTO member_tokens (token_hash, member_id, created_at, last_seen_at) VALUES (?, ?, ?, ?)')
+      .bind(await tokenHash(token), memberId, now, now),
   };
 }
 
 async function roomByPassphrase(c: Context<App>, passphrase: string) {
   const hash = await passphraseHash(normalizePassphrase(passphrase), pepper(c));
-  const room = await c.env.DB.prepare('SELECT id, name, currency, created_at FROM rooms WHERE passphrase_hash = ?').bind(hash).first<{ id: string; name: string; currency: string; created_at: number }>();
+  const room = await c.env.DB.prepare('SELECT id, name, currency, created_at FROM rooms WHERE passphrase_hash = ?')
+    .bind(hash)
+    .first<{ id: string; name: string; currency: string; created_at: number }>();
   return room ?? fail(404, 'room_not_found');
 }
 
@@ -63,6 +86,11 @@ async function listMembers(db: D1Database, roomId: string): Promise<Member[]> {
     .bind(roomId)
     .all<{ id: string; name: string; animal: string; ink: number; created_at: number; claimed: number }>();
   return results.map((m) => ({ id: m.id, name: m.name, animal: m.animal, ink: m.ink, claimed: !!m.claimed, createdAt: m.created_at }));
+}
+
+async function ensureRoomHasSpace(db: D1Database, roomId: string) {
+  const row = await db.prepare('SELECT COUNT(*) AS n FROM members WHERE room_id = ?').bind(roomId).first<{ n: number }>();
+  if ((row?.n ?? 0) >= MAX_MEMBERS) fail(409, 'room_full');
 }
 
 async function nextInk(db: D1Database, roomId: string) {
@@ -82,8 +110,12 @@ app.post('/rooms', async (c) => {
   const passphrase = generatePassphrase();
   const { token, stmt } = await issueToken(db, memberId);
   await db.batch([
-    db.prepare('INSERT INTO rooms (id, name, currency, passphrase_hash, passphrase_enc, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(roomId, input.name, input.currency, await passphraseHash(passphrase, pepper(c)), await encrypt(passphrase, pepper(c)), now),
-    db.prepare('INSERT INTO members (id, room_id, name, animal, ink, created_at) VALUES (?, ?, ?, ?, 0, ?)').bind(memberId, roomId, input.member.name, input.member.animal, now),
+    db
+      .prepare('INSERT INTO rooms (id, name, currency, passphrase_hash, passphrase_enc, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(roomId, input.name, input.currency, await passphraseHash(passphrase, pepper(c)), await encrypt(passphrase, pepper(c)), now),
+    db
+      .prepare('INSERT INTO members (id, room_id, name, animal, ink, created_at) VALUES (?, ?, ?, ?, 0, ?)')
+      .bind(memberId, roomId, input.member.name, input.member.animal, now),
     stmt,
     await logActivity(db, roomId, memberId, 'room_created', { name: input.name }),
   ]);
@@ -109,10 +141,13 @@ app.post('/join', async (c) => {
     await db.batch([stmt, await logActivity(db, room.id, m!.id, 'member_claimed', { name: m!.name })]);
     return c.json({ roomId: room.id, token });
   }
+  await ensureRoomHasSpace(db, room.id);
   const memberId = newId();
   const { token, stmt } = await issueToken(db, memberId);
   await db.batch([
-    db.prepare('INSERT INTO members (id, room_id, name, animal, ink, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(memberId, room.id, input.member.name, input.member.animal, await nextInk(db, room.id), Date.now()),
+    db
+      .prepare('INSERT INTO members (id, room_id, name, animal, ink, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(memberId, room.id, input.member.name, input.member.animal, await nextInk(db, room.id), Date.now()),
     stmt,
     await logActivity(db, room.id, memberId, 'member_joined', { name: input.member.name, animal: input.member.animal }),
   ]);
@@ -127,11 +162,17 @@ room.use(async (c, next) => {
   const token = c.req.header('authorization')?.replace(/^Bearer\s+/i, '');
   if (!token) fail(401, 'unauthorized');
   const hash = await tokenHash(token!);
-  const row = await c.env.DB.prepare('SELECT t.member_id, m.room_id, t.last_seen_at FROM member_tokens t JOIN members m ON m.id = t.member_id WHERE t.token_hash = ?')
+  const row = await c.env.DB.prepare(
+    'SELECT t.member_id, m.room_id, t.last_seen_at FROM member_tokens t JOIN members m ON m.id = t.member_id WHERE t.token_hash = ?',
+  )
     .bind(hash)
     .first<{ member_id: string; room_id: string; last_seen_at: number }>();
   if (!row) fail(401, 'unauthorized');
-  c.set('auth', { memberId: row!.member_id, roomId: row!.room_id });
+  if (Date.now() - row!.last_seen_at > TOKEN_IDLE_MS) {
+    await c.env.DB.prepare('DELETE FROM member_tokens WHERE token_hash = ?').bind(hash).run();
+    fail(401, 'unauthorized');
+  }
+  c.set('auth', { memberId: row!.member_id, roomId: row!.room_id, tokenHash: hash });
   if (Date.now() - row!.last_seen_at > 60 * 60 * 1000) {
     c.executionCtx.waitUntil(c.env.DB.prepare('UPDATE member_tokens SET last_seen_at = ? WHERE token_hash = ?').bind(Date.now(), hash).run());
   }
@@ -140,7 +181,9 @@ room.use(async (c, next) => {
 
 room.get('/', async (c) => {
   const { roomId, memberId } = c.get('auth');
-  const r = await c.env.DB.prepare('SELECT id, name, currency, passphrase_enc, created_at FROM rooms WHERE id = ?').bind(roomId).first<{ id: string; name: string; currency: string; passphrase_enc: string; created_at: number }>();
+  const r = await c.env.DB.prepare('SELECT id, name, currency, passphrase_enc, created_at FROM rooms WHERE id = ?')
+    .bind(roomId)
+    .first<{ id: string; name: string; currency: string; passphrase_enc: string; created_at: number }>();
   if (!r) fail(404, 'room_not_found');
   const state: RoomState = {
     room: { id: r!.id, name: r!.name, currency: r!.currency, createdAt: r!.created_at } satisfies Room,
@@ -152,12 +195,21 @@ room.get('/', async (c) => {
 });
 
 room.post('/passphrase', async (c) => {
-  const { roomId, memberId } = c.get('auth');
+  const { roomId, memberId, tokenHash: own } = c.get('auth');
+  // Older cached clients send no body; treat that as "keep other devices signed in".
+  const parsed = rotateInput.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) fail(400, 'invalid_input');
+  const signOutOthers = parsed.data!.signOutOthers ?? false;
   const db = c.env.DB;
   const passphrase = generatePassphrase();
   await db.batch([
-    db.prepare('UPDATE rooms SET passphrase_hash = ?, passphrase_enc = ? WHERE id = ?').bind(await passphraseHash(passphrase, pepper(c)), await encrypt(passphrase, pepper(c)), roomId),
-    await logActivity(db, roomId, memberId, 'passphrase_rotated'),
+    db
+      .prepare('UPDATE rooms SET passphrase_hash = ?, passphrase_enc = ? WHERE id = ?')
+      .bind(await passphraseHash(passphrase, pepper(c)), await encrypt(passphrase, pepper(c)), roomId),
+    ...(signOutOthers
+      ? [db.prepare('DELETE FROM member_tokens WHERE token_hash != ? AND member_id IN (SELECT id FROM members WHERE room_id = ?)').bind(own, roomId)]
+      : []),
+    await logActivity(db, roomId, memberId, 'passphrase_rotated', { signedOutOthers: signOutOthers }),
   ]);
   return c.json({ passphrase });
 });
@@ -166,9 +218,12 @@ room.post('/members', async (c) => {
   const { roomId, memberId } = c.get('auth');
   const input = await body(c, memberInput);
   const db = c.env.DB;
+  await ensureRoomHasSpace(db, roomId);
   const id = newId();
   await db.batch([
-    db.prepare('INSERT INTO members (id, room_id, name, animal, ink, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(id, roomId, input.name, input.animal, await nextInk(db, roomId), Date.now()),
+    db
+      .prepare('INSERT INTO members (id, room_id, name, animal, ink, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(id, roomId, input.name, input.animal, await nextInk(db, roomId), Date.now()),
     await logActivity(db, roomId, memberId, 'member_added', { name: input.name, animal: input.animal }),
   ]);
   return c.json({ id }, 201);
@@ -186,8 +241,7 @@ room.patch('/me', async (c) => {
 });
 
 room.post('/leave', async (c) => {
-  const token = c.req.header('authorization')!.replace(/^Bearer\s+/i, '');
-  await c.env.DB.prepare('DELETE FROM member_tokens WHERE token_hash = ?').bind(await tokenHash(token)).run();
+  await c.env.DB.prepare('DELETE FROM member_tokens WHERE token_hash = ?').bind(c.get('auth').tokenHash).run();
   return c.json({ ok: true });
 });
 
@@ -196,7 +250,11 @@ room.get('/expenses', async (c) => {
   const db = c.env.DB;
   const [exp, splits] = await db.batch([
     db.prepare('SELECT * FROM expenses WHERE room_id = ? AND deleted_at IS NULL ORDER BY date DESC, created_at DESC').bind(roomId),
-    db.prepare('SELECT s.expense_id, s.member_id, s.value, s.amount FROM expense_splits s JOIN expenses e ON e.id = s.expense_id WHERE e.room_id = ? AND e.deleted_at IS NULL').bind(roomId),
+    db
+      .prepare(
+        'SELECT s.expense_id, s.member_id, s.value, s.amount FROM expense_splits s JOIN expenses e ON e.id = s.expense_id WHERE e.room_id = ? AND e.deleted_at IS NULL',
+      )
+      .bind(roomId),
   ]);
   const byExpense = new Map<string, Expense['splits']>();
   for (const s of splits.results as { expense_id: string; member_id: string; value: number; amount: number }[]) {
@@ -238,19 +296,33 @@ async function validatedExpense(c: Context<App>) {
 }
 
 const splitInserts = (db: D1Database, expenseId: string, allocations: ReturnType<typeof splitExpense>) =>
-  allocations.map((a) => db.prepare('INSERT INTO expense_splits (expense_id, member_id, value, amount) VALUES (?, ?, ?, ?)').bind(expenseId, a.memberId, a.value, a.amount));
+  allocations.map((a) =>
+    db.prepare('INSERT INTO expense_splits (expense_id, member_id, value, amount) VALUES (?, ?, ?, ?)').bind(expenseId, a.memberId, a.value, a.amount),
+  );
 
 room.post('/expenses', async (c) => {
   const { roomId, memberId } = c.get('auth');
   const { input, allocations } = await validatedExpense(c);
   const db = c.env.DB;
+  const count = await db.prepare('SELECT COUNT(*) AS n FROM expenses WHERE room_id = ?').bind(roomId).first<{ n: number }>();
+  if ((count?.n ?? 0) >= MAX_EXPENSES) fail(409, 'too_many_expenses');
   const id = newId();
   const now = Date.now();
   await db.batch([
-    db.prepare('INSERT INTO expenses (id, room_id, kind, title, note, category, amount, paid_by, split_mode, date, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    db
+      .prepare(
+        'INSERT INTO expenses (id, room_id, kind, title, note, category, amount, paid_by, split_mode, date, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
       .bind(id, roomId, input.kind, input.title, input.note, input.category, input.amount, input.paidBy, input.split.mode, input.date, memberId, now, now),
     ...splitInserts(db, id, allocations),
-    await logActivity(db, roomId, memberId, 'expense_added', { expenseId: id, kind: input.kind, title: input.title, amount: input.amount, paidBy: input.paidBy, to: input.kind === 'transfer' ? input.split.entries[0].memberId : undefined }),
+    await logActivity(db, roomId, memberId, 'expense_added', {
+      expenseId: id,
+      kind: input.kind,
+      title: input.title,
+      amount: input.amount,
+      paidBy: input.paidBy,
+      to: input.kind === 'transfer' ? input.split.entries[0].memberId : undefined,
+    }),
   ]);
   return c.json({ id }, 201);
 });
@@ -258,7 +330,9 @@ room.post('/expenses', async (c) => {
 async function ownedExpense(c: Context<App>) {
   const { roomId } = c.get('auth');
   const id = c.req.param('id')!;
-  const row = await c.env.DB.prepare('SELECT id, title, amount, kind FROM expenses WHERE id = ? AND room_id = ? AND deleted_at IS NULL').bind(id, roomId).first<{ id: string; title: string; amount: number; kind: string }>();
+  const row = await c.env.DB.prepare('SELECT id, title, amount, kind FROM expenses WHERE id = ? AND room_id = ? AND deleted_at IS NULL')
+    .bind(id, roomId)
+    .first<{ id: string; title: string; amount: number; kind: string }>();
   return row ?? fail(404, 'expense_not_found');
 }
 
@@ -268,11 +342,19 @@ room.put('/expenses/:id', async (c) => {
   const { input, allocations } = await validatedExpense(c);
   const db = c.env.DB;
   await db.batch([
-    db.prepare('UPDATE expenses SET kind = ?, title = ?, note = ?, category = ?, amount = ?, paid_by = ?, split_mode = ?, date = ?, updated_at = ? WHERE id = ?')
+    db
+      .prepare(
+        'UPDATE expenses SET kind = ?, title = ?, note = ?, category = ?, amount = ?, paid_by = ?, split_mode = ?, date = ?, updated_at = ? WHERE id = ?',
+      )
       .bind(input.kind, input.title, input.note, input.category, input.amount, input.paidBy, input.split.mode, input.date, Date.now(), existing.id),
     db.prepare('DELETE FROM expense_splits WHERE expense_id = ?').bind(existing.id),
     ...splitInserts(db, existing.id, allocations),
-    await logActivity(db, roomId, memberId, 'expense_updated', { expenseId: existing.id, title: input.title, amount: input.amount, previousAmount: existing.amount }),
+    await logActivity(db, roomId, memberId, 'expense_updated', {
+      expenseId: existing.id,
+      title: input.title,
+      amount: input.amount,
+      previousAmount: existing.amount,
+    }),
   ]);
   return c.json({ ok: true });
 });
@@ -292,7 +374,10 @@ room.post('/expenses/:id/restore', async (c) => {
   const { roomId, memberId } = c.get('auth');
   const id = c.req.param('id');
   const db = c.env.DB;
-  const row = await db.prepare('SELECT id, title, amount FROM expenses WHERE id = ? AND room_id = ? AND deleted_at IS NOT NULL').bind(id, roomId).first<{ id: string; title: string; amount: number }>();
+  const row = await db
+    .prepare('SELECT id, title, amount FROM expenses WHERE id = ? AND room_id = ? AND deleted_at IS NOT NULL')
+    .bind(id, roomId)
+    .first<{ id: string; title: string; amount: number }>();
   if (!row) fail(404, 'expense_not_found');
   await db.batch([
     db.prepare('UPDATE expenses SET deleted_at = NULL WHERE id = ?').bind(id),
@@ -304,7 +389,9 @@ room.post('/expenses/:id/restore', async (c) => {
 room.get('/activity', async (c) => {
   const { roomId } = c.get('auth');
   const before = Number(c.req.query('before')) || Number.MAX_SAFE_INTEGER;
-  const { results } = await c.env.DB.prepare('SELECT id, member_id, type, payload, created_at FROM activity WHERE room_id = ? AND created_at < ? ORDER BY created_at DESC LIMIT 50')
+  const { results } = await c.env.DB.prepare(
+    'SELECT id, member_id, type, payload, created_at FROM activity WHERE room_id = ? AND created_at < ? ORDER BY created_at DESC LIMIT 50',
+  )
     .bind(roomId, before)
     .all<{ id: string; member_id: string | null; type: Activity['type']; payload: string; created_at: number }>();
   const activity: Activity[] = results.map((a) => ({ id: a.id, memberId: a.member_id, type: a.type, payload: JSON.parse(a.payload), createdAt: a.created_at }));

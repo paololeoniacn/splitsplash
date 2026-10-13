@@ -22,6 +22,18 @@
       "name": "JOIN_LIMITER",
       "namespace_id": "1001",
       "simple": { "limit": 10, "period": 60 }
+    },
+    {
+      // Per /48 (IPv6) or /24 (IPv4): stops rotating through addresses in one allocation
+      "name": "NETWORK_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 30, "period": 60 }
+    },
+    {
+      // Ceiling across all clients (per Cloudflare location) on passphrase guessing
+      "name": "GLOBAL_LIMITER",
+      "namespace_id": "1003",
+      "simple": { "limit": 600, "period": 60 }
     }
   ],
   "observability": { "enabled": true }

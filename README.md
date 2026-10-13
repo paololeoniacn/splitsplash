@@ -1,7 +1,7 @@
 # SplitSplash 🦊
 
 Dividete le spese di gruppo senza account. Una persona crea una **room** e riceve una
-**passphrase fatta di animali** (es. `volpe-koala-gufo-1234`); la passa al gruppo, chi la
+**passphrase fatta di animali** (es. `volpe-koala-gufo-orso-ape-1234`); la passa al gruppo, chi la
 inserisce sceglie nome e animale, e da lì basta aggiungere le spese. SplitSplash calcola saldi
 e il numero minimo di rimborsi.
 
@@ -44,7 +44,8 @@ npm run db:migrate:remote
 npm run deploy
 ```
 
-Il rate limiting usa il binding `ratelimits` (`JOIN_LIMITER`, 10 richieste/minuto per IP).
+Il rate limiting su join/creazione usa i binding `ratelimits`: `JOIN_LIMITER` (10/min per IPv4 o IPv6 /64),
+`NETWORK_LIMITER` (30/min per /24 o /48) e `GLOBAL_LIMITER` (600/min in totale).
 
 ### GitHub Actions
 
@@ -55,7 +56,12 @@ e `CLOUDFLARE_ACCOUNT_ID`.
 ## Sicurezza, in breve
 
 - Chi ha la passphrase entra nella room e può reclamare qualsiasi membro: va condivisa solo col gruppo.
-  Da menu si può generare una nuova passphrase (la vecchia smette di funzionare).
+  Da menu si può generare una nuova passphrase (la vecchia smette di funzionare) e, volendo,
+  disconnettere tutti gli altri dispositivi.
+- Passphrase: 5 animali + 4 cifre (~51 bit). Quelle vecchie a 3 animali restano valide ma vengono segnalate.
+- I token dei dispositivi scadono dopo 90 giorni di inattività. Limiti: 50 membri e 5000 spese per room.
+- Header di sicurezza: CSP, HSTS ecc. in `public/_headers`; `no-store`/`nosniff` sulle API.
+  Dettagli in `SECURITY-REVIEW.md`.
 - Nel DB la passphrase è salvata come hash con pepper (per il lookup) e cifrata AES-GCM (per
   poterla mostrare ai membri); i token dei membri solo come hash.
 - Le icone PWA in `public/` sono generate da `scripts/icons.mjs`.
