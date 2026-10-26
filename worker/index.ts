@@ -1,26 +1,19 @@
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import type { z } from 'zod';
 import { INK_COUNT } from '../shared/animals';
 import { generatePassphrase, normalizePassphrase } from '../shared/passphrase';
 import { computeBalances, simplifyDebts, type Transfer } from '../shared/balances';
 import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput, rotateInput, settleAllInput } from '../shared/schemas';
 import { SplitError, splitExpense } from '../shared/split';
 import type { Activity, ActivityType, Expense, Member, Room, RoomState } from '../shared/types';
-import { networkKeys } from './net';
-import { decrypt, encrypt, newId, passphraseHash, randomToken, sha256, tokenHash } from './crypto';
-
-type Auth = { memberId: string; roomId: string; tokenHash: string };
-type App = { Bindings: Env; Variables: { auth: Auth } };
+import { decrypt, encrypt, newId, passphraseHash, tokenHash } from './crypto';
+import { body, fail, guardFailures, issueToken, pepper, rateLimit, recordFailure, type App } from './http';
 
 const app = new Hono<App>().basePath('/api');
 
 const MAX_MEMBERS = 50;
 const MAX_EXPENSES = 5000;
 const TOKEN_IDLE_MS = 90 * 24 * 60 * 60 * 1000;
-// Wrong passphrases allowed per hour, per address and per wider network, before lookups are refused.
-const FAILURE_WINDOW_MS = 60 * 60 * 1000;
-const MAX_FAILURES = { host: 12, wide: 40 } as const;
 
 app.use(async (c, next) => {
   await next();
@@ -30,79 +23,22 @@ app.use(async (c, next) => {
   c.header('X-Frame-Options', 'DENY');
 });
 
-const fail = (status: 400 | 401 | 403 | 404 | 409 | 429 | 500, code: string): never => {
-  throw new HTTPException(status, { res: Response.json({ error: code }, { status }) });
-};
-
-async function body<T extends z.ZodType>(c: Context<App>, schema: T): Promise<z.infer<T>> {
-  const raw = await c.req.json().catch(() => fail(400, 'invalid_json'));
-  const parsed = schema.safeParse(raw);
-  if (!parsed.success) fail(400, 'invalid_input');
-  return parsed.data as z.infer<T>;
-}
-
-async function rateLimit(c: Context<App>) {
-  const { host, wide } = networkKeys(c.req.header('cf-connecting-ip') ?? 'local');
-  const checks: [RateLimit | undefined, string][] = [
-    [c.env.JOIN_LIMITER, host],
-    [c.env.NETWORK_LIMITER, wide],
-    [c.env.GLOBAL_LIMITER, 'global'],
-  ];
-  for (const [limiter, key] of checks) {
-    if (limiter && !(await limiter.limit({ key })).success) fail(429, 'rate_limited');
-  }
-}
-
-const pepper = (c: Context<App>) => c.env.PEPPER || fail(500, 'server_misconfigured');
-
 async function logActivity(db: D1Database, roomId: string, memberId: string | null, type: ActivityType, payload: Record<string, unknown> = {}) {
   return db
     .prepare('INSERT INTO activity (id, room_id, member_id, type, payload, created_at) VALUES (?, ?, ?, ?, ?, ?)')
     .bind(newId(), roomId, memberId, type, JSON.stringify(payload), Date.now());
 }
 
-async function issueToken(db: D1Database, memberId: string) {
-  const token = randomToken();
-  const now = Date.now();
-  return {
-    token,
-    stmt: db
-      .prepare('INSERT INTO member_tokens (token_hash, member_id, created_at, last_seen_at) VALUES (?, ?, ?, ?)')
-      .bind(await tokenHash(token), memberId, now, now),
-  };
-}
-
-async function failureKeys(c: Context<App>) {
-  const { host, wide } = networkKeys(c.req.header('cf-connecting-ip') ?? 'local');
-  const bucket = Math.floor(Date.now() / FAILURE_WINDOW_MS);
-  // Hashed so the table never holds addresses.
-  return [
-    { key: await sha256(`fail:${pepper(c)}:host:${host}`), bucket, max: MAX_FAILURES.host },
-    { key: await sha256(`fail:${pepper(c)}:wide:${wide}`), bucket, max: MAX_FAILURES.wide },
-  ];
-}
-
 async function roomByPassphrase(c: Context<App>, passphrase: string) {
   const db = c.env.DB;
-  const keys = await failureKeys(c);
-  const counts = await db.batch(keys.map((k) => db.prepare('SELECT count FROM join_failures WHERE key = ? AND bucket = ?').bind(k.key, k.bucket)));
-  if (keys.some((k, i) => ((counts[i].results[0] as { count: number } | undefined)?.count ?? 0) >= k.max)) fail(429, 'too_many_failures');
-
+  const keys = await guardFailures(c);
   const hash = await passphraseHash(normalizePassphrase(passphrase), pepper(c));
   const room = await db
     .prepare('SELECT id, name, currency, created_at FROM rooms WHERE passphrase_hash = ?')
     .bind(hash)
     .first<{ id: string; name: string; currency: string; created_at: number }>();
   if (room) return room;
-
-  await db.batch([
-    ...keys.map((k) =>
-      db
-        .prepare('INSERT INTO join_failures (key, bucket, count) VALUES (?, ?, 1) ON CONFLICT (key, bucket) DO UPDATE SET count = count + 1')
-        .bind(k.key, k.bucket),
-    ),
-    db.prepare('DELETE FROM join_failures WHERE bucket < ?').bind(keys[0].bucket - 1),
-  ]);
+  await recordFailure(db, keys);
   return fail(404, 'room_not_found');
 }
 
