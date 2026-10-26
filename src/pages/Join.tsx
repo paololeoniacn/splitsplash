@@ -78,11 +78,11 @@ export default function Join() {
   return (
     <FormShell title={t('join.whoAreYou', { room: found.room.name })}>
       {!isNew ? (
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {found.members.length > 0 && (
             <div>
               <p className="mb-3 text-ink-2">{t('join.pickExisting')}</p>
-              <ul className="grid gap-2">
+              <ul className="grid grid-cols-1 gap-2">
                 {found.members.map((m) => (
                   <li key={m.id}>
                     <button

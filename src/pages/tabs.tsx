@@ -60,7 +60,7 @@ export function ExpensesTab() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {groups.map(([date, items]) => (
         <section key={date} aria-label={dateLabel(date)}>
           <h2 className="microprint mb-1.5">{dateLabel(date)}</h2>
@@ -165,7 +165,7 @@ export function BalancesTab() {
   const members = [...state.members].sort((a, b) => (balances.get(b.id) ?? 0) - (balances.get(a.id) ?? 0));
 
   return (
-    <div className="grid gap-9">
+    <div className="grid grid-cols-1 gap-9">
       {lead ? (
         <TransferCard
           x={lead}
@@ -188,7 +188,7 @@ export function BalancesTab() {
         <section>
           <h2 className="text-lg font-bold">{t('balances.suggested')}</h2>
           <p className="mb-3 text-sm text-ink-2">{t('balances.suggestedHint')}</p>
-          <ul className="grid gap-2">
+          <ul className="grid grid-cols-1 gap-2">
             {[...mine.slice(1), ...others].map((x) => (
               <li key={keyOf(x)}>
                 <TransferCard x={x} stamped={stamped === keyOf(x)} pending={settle.isPending && settle.variables === x} onSettle={() => settle.mutate(x)} />
@@ -205,7 +205,7 @@ export function BalancesTab() {
             const net = balances.get(m.id) ?? 0;
             const max = Math.max(1, ...[...balances.values()].map(Math.abs));
             return (
-              <li key={m.id} className="grid grid-cols-[auto_1fr_7.5rem] items-center gap-3 py-3">
+              <li key={m.id} className="grid grid-cols-[auto_minmax(0,1fr)_7.5rem] items-center gap-3 py-3">
                 <MiniPortrait animal={m.animal} ink={m.ink} size={34} />
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{name(m.id)}</p>
@@ -317,7 +317,7 @@ export function ActivityTab() {
 
   return (
     <div>
-      <ol className="relative grid gap-0.5 before:absolute before:top-3 before:bottom-3 before:left-[15px] before:w-px before:bg-rule">
+      <ol className="relative grid grid-cols-1 gap-0.5 before:absolute before:top-3 before:bottom-3 before:left-[15px] before:w-px before:bg-rule">
         {items.map((a) => {
           const who = a.memberId ? byId.get(a.memberId) : undefined;
           const p = a.payload as { title?: string; name?: string; amount?: number };
@@ -325,7 +325,7 @@ export function ActivityTab() {
             <li key={a.id} className="relative flex items-start gap-3 py-2.5">
               {who ? <MiniPortrait animal={who.animal} ink={who.ink} size={31} /> : <span className="size-[31px] rounded-full bg-rule" />}
               <div className="min-w-0 flex-1 pt-0.5">
-                <p className="leading-snug">
+                <p className="leading-snug [overflow-wrap:anywhere]">
                   {t(`activity.${a.type}`, {
                     context: who?.id === state.me ? 'you' : undefined,
                     who: who ? (who.id === state.me ? t('room.youShort') : who.name) : t('activity.someone'),

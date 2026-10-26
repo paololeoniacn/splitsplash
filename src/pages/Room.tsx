@@ -268,7 +268,7 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
       )}
       {view !== 'main' && (
         <form
-          className="grid gap-6"
+          className="grid grid-cols-1 gap-6"
           onSubmit={(e) => {
             e.preventDefault();
             if (!name.trim() || !animal) return;

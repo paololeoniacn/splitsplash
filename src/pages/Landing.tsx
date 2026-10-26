@@ -113,7 +113,7 @@ export default function Landing() {
           </div>
           <ol className="divide-y divide-rule border-y border-rule">
             {(t('landing.manifesto.points', { returnObjects: true }) as [string, string][]).map(([title, body], i) => (
-              <li key={title} className="grid grid-cols-[2.5rem_1fr] gap-x-3 py-5">
+              <li key={title} className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 py-5">
                 <span className="num pt-0.5 font-mono text-sm font-semibold text-owe">{String(i + 1).padStart(2, '0')}</span>
                 <div>
                   <h3 className="font-bold">{title}</h3>

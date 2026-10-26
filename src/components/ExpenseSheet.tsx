@@ -240,7 +240,7 @@ export function ExpenseSheet({
       }
     >
       <form
-        className="grid gap-6"
+        className="grid grid-cols-1 gap-6"
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
