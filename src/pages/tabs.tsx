@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, ArrowRightLeft } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft, CheckCheck } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -9,7 +9,9 @@ import { CATEGORY_ICONS } from '../components/categoryIcon';
 import { MiniPortrait, Portrait } from '../components/Portrait';
 import { Rosette } from '../components/Guilloche';
 import { Button } from '../components/ui';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
+import { errorKey } from '../i18n';
+import { useToast } from '../components/Toast';
 import { todayISO } from '../lib/format';
 import { activityKey, expensesKey } from '../lib/useRoom';
 import { useRoomCtx } from './Room';
@@ -159,6 +161,30 @@ export function BalancesTab() {
     },
   });
 
+  const toast = useToast();
+  const [confirmAll, setConfirmAll] = useState(false);
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: expensesKey(roomId) });
+    void qc.invalidateQueries({ queryKey: activityKey(roomId) });
+  };
+  const settleAll = useMutation({
+    mutationFn: () => api.settleAll(roomId, { title: t('expense.transferTitle'), date: todayISO(), transfers }),
+    onSuccess: (r) => {
+      setConfirmAll(false);
+      setStamped('all');
+      toast({ text: t('balances.settledAll', { count: r.count }) });
+      setTimeout(() => {
+        setStamped(null);
+        refresh();
+      }, 1100);
+    },
+    onError: (e) => {
+      if (e instanceof ApiError && e.code === 'balances_changed') refresh();
+    },
+  });
+  const totalToSettle = transfers.reduce((s, x) => s + x.amount, 0);
+  const isStamped = (x: Transfer) => stamped === 'all' || stamped === keyOf(x);
+
   const name = (id: string) => (id === state.me ? t('room.youShort') : (byId.get(id)?.name ?? '?'));
 
   const lead = mine[0];
@@ -167,13 +193,7 @@ export function BalancesTab() {
   return (
     <div className="grid grid-cols-1 gap-9">
       {lead ? (
-        <TransferCard
-          x={lead}
-          lead
-          stamped={stamped === keyOf(lead)}
-          pending={settle.isPending && settle.variables === lead}
-          onSettle={() => settle.mutate(lead)}
-        />
+        <TransferCard x={lead} lead stamped={isStamped(lead)} pending={settle.isPending && settle.variables === lead} onSettle={() => settle.mutate(lead)} />
       ) : (
         <div className="flex items-center gap-4 rounded-note bg-owed-wash px-5 py-5">
           <Portrait animal={byId.get(state.me)?.animal ?? 'otter'} ink={byId.get(state.me)?.ink ?? 2} size={60} />
@@ -186,12 +206,49 @@ export function BalancesTab() {
 
       {transfers.length > (lead ? 1 : 0) && (
         <section>
-          <h2 className="text-lg font-bold">{t('balances.suggested')}</h2>
-          <p className="mb-3 text-sm text-ink-2">{t('balances.suggestedHint')}</p>
+          <div className="mb-3 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold">{t('balances.suggested')}</h2>
+              <p className="text-sm text-ink-2">{t('balances.suggestedHint')}</p>
+            </div>
+            {transfers.length > 1 && !confirmAll && (
+              <Button size="sm" variant="secondary" className="shrink-0" onClick={() => setConfirmAll(true)} disabled={stamped !== null}>
+                <CheckCheck className="size-4" aria-hidden="true" />
+                {t('balances.settleAll')}
+              </Button>
+            )}
+          </div>
+          {confirmAll && (
+            <div className="mb-3 grid gap-3 rounded-xl px-5 py-4 ring-1 ring-rule" role="group" aria-label={t('balances.settleAll')}>
+              <p className="font-semibold">{t('balances.settleAllConfirm', { count: transfers.length, amount: money(totalToSettle) })}</p>
+              <p className="text-sm text-ink-2">{t('balances.settleAllHint')}</p>
+              {settleAll.error && (
+                <p className="text-sm text-owe" role="alert">
+                  {t(errorKey(settleAll.error instanceof ApiError ? settleAll.error.code : 'generic'))}
+                </p>
+              )}
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setConfirmAll(false);
+                    settleAll.reset();
+                  }}
+                  disabled={settleAll.isPending}
+                >
+                  {t('balances.cancel')}
+                </Button>
+                <Button onClick={() => settleAll.mutate()} loading={settleAll.isPending}>
+                  <CheckCheck className="size-4" aria-hidden="true" />
+                  {t('balances.settleAllGo')}
+                </Button>
+              </div>
+            </div>
+          )}
           <ul className="grid grid-cols-1 gap-2">
             {[...mine.slice(1), ...others].map((x) => (
               <li key={keyOf(x)}>
-                <TransferCard x={x} stamped={stamped === keyOf(x)} pending={settle.isPending && settle.variables === x} onSettle={() => settle.mutate(x)} />
+                <TransferCard x={x} stamped={isStamped(x)} pending={settle.isPending && settle.variables === x} onSettle={() => settle.mutate(x)} />
               </li>
             ))}
           </ul>
@@ -320,7 +377,7 @@ export function ActivityTab() {
       <ol className="relative grid grid-cols-1 gap-0.5 before:absolute before:top-3 before:bottom-3 before:left-[15px] before:w-px before:bg-rule">
         {items.map((a) => {
           const who = a.memberId ? byId.get(a.memberId) : undefined;
-          const p = a.payload as { title?: string; name?: string; amount?: number };
+          const p = a.payload as { title?: string; name?: string; amount?: number; count?: number };
           return (
             <li key={a.id} className="relative flex items-start gap-3 py-2.5">
               {who ? <MiniPortrait animal={who.animal} ink={who.ink} size={31} /> : <span className="size-[31px] rounded-full bg-rule" />}
@@ -331,6 +388,7 @@ export function ActivityTab() {
                     who: who ? (who.id === state.me ? t('room.youShort') : who.name) : t('activity.someone'),
                     title: p.title,
                     name: p.name,
+                    count: p.count,
                   })}
                   {typeof p.amount === 'number' && <span className="num font-semibold"> · {money(p.amount)}</span>}
                 </p>

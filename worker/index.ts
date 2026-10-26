@@ -3,7 +3,8 @@ import { HTTPException } from 'hono/http-exception';
 import type { z } from 'zod';
 import { INK_COUNT } from '../shared/animals';
 import { generatePassphrase, normalizePassphrase } from '../shared/passphrase';
-import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput, rotateInput } from '../shared/schemas';
+import { computeBalances, simplifyDebts, type Transfer } from '../shared/balances';
+import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput, rotateInput, settleAllInput } from '../shared/schemas';
 import { SplitError, splitExpense } from '../shared/split';
 import type { Activity, ActivityType, Expense, Member, Room, RoomState } from '../shared/types';
 import { networkKeys } from './net';
@@ -354,6 +355,59 @@ room.post('/expenses', async (c) => {
     }),
   ]);
   return c.json({ id }, 201);
+});
+
+const planKey = (list: Transfer[]) =>
+  list
+    .map((x) => `${x.from}>${x.to}:${x.amount}`)
+    .sort()
+    .join('|');
+
+/** Records every suggested reimbursement at once, so all balances go back to zero. */
+room.post('/settle-all', async (c) => {
+  const { roomId, memberId } = c.get('auth');
+  const input = await body(c, settleAllInput);
+  const db = c.env.DB;
+  const [members, splits, count] = await db.batch([
+    db.prepare('SELECT id FROM members WHERE room_id = ?').bind(roomId),
+    db
+      .prepare(
+        'SELECT e.id, e.kind, e.amount, e.paid_by, s.member_id, s.amount AS share FROM expenses e JOIN expense_splits s ON s.expense_id = e.id WHERE e.room_id = ? AND e.deleted_at IS NULL',
+      )
+      .bind(roomId),
+    db.prepare('SELECT COUNT(*) AS n FROM expenses WHERE room_id = ?').bind(roomId),
+  ]);
+  const items = new Map<string, { kind: 'expense' | 'transfer'; amount: number; paidBy: string; splits: { memberId: string; amount: number }[] }>();
+  for (const r of splits.results as { id: string; kind: 'expense' | 'transfer'; amount: number; paid_by: string; member_id: string; share: number }[]) {
+    const item = items.get(r.id) ?? { kind: r.kind, amount: r.amount, paidBy: r.paid_by, splits: [] };
+    item.splits.push({ memberId: r.member_id, amount: r.share });
+    items.set(r.id, item);
+  }
+  const plan = simplifyDebts(
+    computeBalances(
+      (members.results as { id: string }[]).map((m) => m.id),
+      [...items.values()],
+    ),
+  );
+  if (!plan.length) fail(409, 'nothing_to_settle');
+  if (planKey(plan) !== planKey(input.transfers)) fail(409, 'balances_changed');
+  if (((count.results[0] as { n: number } | undefined)?.n ?? 0) + plan.length > MAX_EXPENSES) fail(409, 'too_many_expenses');
+
+  const now = Date.now();
+  const stmts = plan.flatMap((x) => {
+    const id = newId();
+    return [
+      db
+        .prepare(
+          'INSERT INTO expenses (id, room_id, kind, title, note, category, amount, paid_by, split_mode, date, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        )
+        .bind(id, roomId, 'transfer', input.title, '', 'other', x.amount, x.from, 'equal', input.date, memberId, now, now),
+      db.prepare('INSERT INTO expense_splits (expense_id, member_id, value, amount) VALUES (?, ?, ?, ?)').bind(id, x.to, 1, x.amount),
+    ];
+  });
+  const total = plan.reduce((s, x) => s + x.amount, 0);
+  await db.batch([...stmts, await logActivity(db, roomId, memberId, 'settled_all', { count: plan.length, amount: total })]);
+  return c.json({ count: plan.length, amount: total }, 201);
 });
 
 async function ownedExpense(c: Context<App>) {

@@ -13,6 +13,16 @@ export const createRoomInput = z.object({
   member: memberInput,
 });
 
+export const settleAllInput = z.object({
+  title: z.string().trim().min(1).max(80),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  // The plan the client showed; the server only records it if it still matches the current balances.
+  transfers: z
+    .array(z.object({ from: z.string().min(1), to: z.string().min(1), amount: z.number().int().positive() }))
+    .min(1)
+    .max(100),
+});
+
 export const rotateInput = z.object({ signOutOthers: z.boolean().optional() });
 
 export const lookupInput = z.object({ passphrase: z.string().min(1).max(120) });

@@ -42,7 +42,8 @@ export type ActivityType =
   | 'expense_added'
   | 'expense_updated'
   | 'expense_deleted'
-  | 'passphrase_rotated';
+  | 'passphrase_rotated'
+  | 'settled_all';
 
 export interface Activity {
   id: string;

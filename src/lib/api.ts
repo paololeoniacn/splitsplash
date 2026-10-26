@@ -48,6 +48,8 @@ export const api = {
     request<{ roomId: string; token: string }>('/join', { method: 'POST', body: json(body) }),
 
   room: (roomId: string) => request<RoomState>('/room', { roomId }),
+  settleAll: (roomId: string, body: { title: string; date: string; transfers: { from: string; to: string; amount: number }[] }) =>
+    request<{ count: number; amount: number }>('/room/settle-all', { method: 'POST', body: json(body), roomId }),
   rotatePassphrase: (roomId: string, signOutOthers: boolean) =>
     request<{ passphrase: string }>('/room/passphrase', { method: 'POST', body: json({ signOutOthers }), roomId }),
   addMember: (roomId: string, body: { name: string; animal: string }) => request<{ id: string }>('/room/members', { method: 'POST', body: json(body), roomId }),
