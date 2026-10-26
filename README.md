@@ -10,6 +10,8 @@ e il numero minimo di rimborsi.
 - Semplificazione debiti, categorie, modifica/eliminazione con annulla, storico attività
 - Invito via link (passphrase nel `#fragment`, non finisce nei log) e QR
 - Nessun login: un token per dispositivo; da un nuovo device si "reclama" il proprio membro
+- Portachiavi opzionale (`/keys`): salva le tue room con una **passkey** e un **codice di recupero**
+  di 8 parole-animale, e ritrovale su qualsiasi dispositivo. Niente email, niente account
 - IT / EN, dark mode, installabile come PWA
 
 ## Stack
@@ -60,7 +62,11 @@ e `CLOUDFLARE_ACCOUNT_ID`.
   disconnettere tutti gli altri dispositivi.
 - Passphrase: 5 parole tra animali e habitat + 4 cifre (es. `volpe-savana-gufo-laguna-riccio-0042`, ~53 bit), solo a–z/0–9/- quindi sicura negli URL. Quelle vecchie a 3 animali restano valide ma vengono segnalate.
 - Blocco brute-force: dopo 12 passphrase sbagliate in un'ora da un indirizzo (40 dalla stessa rete /48 o /24) il lookup viene rifiutato per il resto dell'ora (tabella `join_failures`, chiavi hashate).
-- I token dei dispositivi scadono dopo 90 giorni di inattività. Limiti: 50 membri e 5000 spese per room.
+- Portachiavi: le passkey (WebAuthn, `@simplewebauthn/server`) valgono solo su `splitsplash.pages.dev`
+  (e `localhost` in sviluppo): se cambia dominio vanno ricreate. Il codice di recupero (8 parole, ~64 bit)
+  è salvato solo come hash con pepper ed è soggetto allo stesso blocco brute-force delle passphrase.
+  Il recupero emette nuovi token per i membri collegati: chi ha il codice entra come te nelle tue room.
+- I token dei dispositivi scadono dopo 90 giorni di inattività (portachiavi: 180). Limiti: 50 membri e 5000 spese per room.
 - Header di sicurezza: CSP, HSTS ecc. in `public/_headers`; `no-store`/`nosniff` sulle API.
   Dettagli in `SECURITY-REVIEW.md`.
 - Nel DB la passphrase è salvata come hash con pepper (per il lookup) e cifrata AES-GCM (per
