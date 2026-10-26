@@ -26,12 +26,21 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - name: Skip without Cloudflare secrets
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "::notice::CLOUDFLARE_API_TOKEN not set, skipping deploy (deploy locally with npm run deploy)"
       - uses: actions/checkout@v4
+        if: env.CLOUDFLARE_API_TOKEN != ''
       - uses: actions/setup-node@v4
+        if: env.CLOUDFLARE_API_TOKEN != ''
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npm run db:migrate:remote
-      - run: npm run deploy
-      - run: npm run deploy:pages
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npm ci
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npm run db:migrate:remote
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npm run deploy
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npm run deploy:pages
