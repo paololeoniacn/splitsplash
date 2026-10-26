@@ -9,6 +9,7 @@ import { Button, Field, inputClass, TextInput } from '../components/ui';
 import { errorKey } from '../i18n';
 import { api, ApiError } from '../lib/api';
 import { saveRoom } from '../lib/storage';
+import { linkToVault } from '../lib/vault';
 
 export default function CreateRoom() {
   const { t, i18n } = useTranslation();
@@ -23,6 +24,7 @@ export default function CreateRoom() {
     mutationFn: () => api.createRoom({ name: name.trim(), currency, member: { name: me.trim(), animal } }),
     onSuccess: (res) => {
       saveRoom({ roomId: res.roomId, token: res.token, name: name.trim() });
+      linkToVault(res.token);
       navigate(`/r/${res.roomId}/invite?new=1`, { replace: true });
     },
   });

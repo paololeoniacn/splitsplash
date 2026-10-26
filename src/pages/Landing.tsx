@@ -1,4 +1,4 @@
-import { ArrowRight, Check, ChevronRight, KeyRound } from 'lucide-react';
+import { ArrowRight, Check, ChevronRight, KeyRound, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { generatePassphrase } from '../../shared/passphrase';
@@ -9,7 +9,7 @@ import { Serial } from '../components/Serial';
 import { Button } from '../components/ui';
 import { Wordmark } from '../components/Wordmark';
 import { useMoney } from '../lib/format';
-import { savedRooms } from '../lib/storage';
+import { savedRooms, vaultToken } from '../lib/storage';
 import { VersionFooter } from '../components/VersionFooter';
 import { SOURCE_URL } from '../lib/links';
 import { useMemo } from 'react';
@@ -25,6 +25,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const money = useMoney('EUR');
   const rooms = savedRooms();
+  const keyring = !!vaultToken();
   const specimenSerial = useMemo(() => generatePassphrase(), []);
 
   return (
@@ -74,6 +75,7 @@ export default function Landing() {
               </ul>
             </nav>
           )}
+          <KeyringEntry active={keyring} hasRooms={rooms.length > 0} />
         </section>
 
         <section aria-label={t('landing.specimen')} className="relative">
@@ -127,6 +129,33 @@ export default function Landing() {
       <p className="text-sm text-ink-2">{t('landing.privacy')}</p>
       <VersionFooter className="pb-8" />
     </div>
+  );
+}
+
+function KeyringEntry({ active, hasRooms }: { active: boolean; hasRooms: boolean }) {
+  const { t } = useTranslation();
+  if (active || !hasRooms)
+    return (
+      <Link
+        to="/keys"
+        className={`inline-flex items-center gap-2 text-sm font-semibold underline decoration-rule decoration-2 underline-offset-4 transition-colors hover:decoration-ink ${hasRooms ? 'mt-4' : 'mt-8'}`}
+      >
+        {active ? <ShieldCheck className="size-4 text-owed" aria-hidden="true" /> : <KeyRound className="size-4" aria-hidden="true" />}
+        {active ? t('keys.landingActive') : t('keys.landingRecover')}
+      </Link>
+    );
+  return (
+    <Link
+      to="/keys"
+      className="group ink-0 mt-4 flex items-center gap-3.5 rounded-note bg-raised px-4 py-3.5 ring-1 ring-rule transition-shadow hover:ring-ink/40"
+    >
+      <KeyRound className="size-5 shrink-0 text-[var(--ink-deep)]" aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{t('keys.landingSave')}</span>
+        <span className="block text-sm text-ink-2">{t('keys.landingSaveHint')}</span>
+      </span>
+      <ChevronRight className="size-5 shrink-0 text-ink-2 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+    </Link>
   );
 }
 

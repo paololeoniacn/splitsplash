@@ -11,6 +11,7 @@ import { Button, TextInput } from '../components/ui';
 import { errorKey } from '../i18n';
 import { api, ApiError, type LookupResult } from '../lib/api';
 import { saveRoom } from '../lib/storage';
+import { linkToVault } from '../lib/vault';
 import { ANIMALS, INK_COUNT } from '../../shared/animals';
 
 const errText = (t: (k: string) => string, e: unknown) => (e ? t(errorKey(e instanceof ApiError ? e.code : 'generic')) : undefined);
@@ -38,6 +39,7 @@ export default function Join() {
     mutationFn: (body: { memberId: string } | { member: { name: string; animal: string } }) => api.join({ passphrase, ...body }),
     onSuccess: (res) => {
       saveRoom({ roomId: res.roomId, token: res.token, name: found!.room.name });
+      linkToVault(res.token);
       navigate(`/r/${res.roomId}`, { replace: true });
     },
   });

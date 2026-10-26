@@ -27,6 +27,7 @@ const router = createBrowserRouter([
   { path: '/new', element: <CreateRoom /> },
   { path: '/join', element: <Join /> },
   { path: '/j', element: <Join /> },
+  { path: '/keys', lazy: () => import('./pages/Keyring').then((m) => ({ Component: m.default })) },
   { path: '/r/:roomId/invite', lazy: () => import('./pages/Invite').then((m) => ({ Component: m.default })) },
   {
     path: '/r/:roomId',

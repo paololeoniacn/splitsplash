@@ -1,6 +1,6 @@
 import type { ExpenseInput } from '../../shared/schemas';
 import type { Activity, Expense, Member, RoomState } from '../../shared/types';
-import { forgetRoom, tokenFor } from './storage';
+import { forgetRoom, forgetVault, tokenFor, vaultToken } from './storage';
 
 export class ApiError extends Error {
   constructor(
@@ -11,11 +11,16 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init: RequestInit & { roomId?: string } = {}): Promise<T> {
+async function request<T>(path: string, init: RequestInit & { roomId?: string; vault?: boolean } = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body) headers.set('content-type', 'application/json');
   if (init.roomId) {
     const token = tokenFor(init.roomId);
+    if (!token) throw new ApiError(401, 'unauthorized');
+    headers.set('authorization', `Bearer ${token}`);
+  }
+  if (init.vault) {
+    const token = vaultToken();
     if (!token) throw new ApiError(401, 'unauthorized');
     headers.set('authorization', `Bearer ${token}`);
   }
@@ -28,6 +33,7 @@ async function request<T>(path: string, init: RequestInit & { roomId?: string } 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401 && init.roomId) forgetRoom(init.roomId);
+    if (res.status === 401 && init.vault) forgetVault();
     throw new ApiError(res.status, (data as { error?: string }).error ?? 'server_error');
   }
   return data as T;
@@ -39,6 +45,19 @@ export interface LookupResult {
   room: { id: string; name: string; currency: string };
   members: Member[];
 }
+
+export interface VaultOpened {
+  vaultToken: string;
+  rooms: { roomId: string; name: string; token: string }[];
+}
+
+export interface VaultInfo {
+  rooms: { roomId: string; roomName: string; member: { name: string; animal: string; ink: number } }[];
+  passkeys: number;
+  createdAt: number;
+}
+
+type PasskeyOptions<O> = { challengeId: string; options: O };
 
 export const api = {
   createRoom: (body: { name: string; currency: string; member: { name: string; animal: string } }) =>
@@ -64,4 +83,19 @@ export const api = {
 
   activity: (roomId: string, before?: number) =>
     request<{ activity: Activity[]; hasMore: boolean }>(`/room/activity${before ? `?before=${before}` : ''}`, { roomId }),
+
+  vaultCreate: (tokens: string[]) => request<{ vaultToken: string; recoveryCode: string }>('/vault', { method: 'POST', body: json({ tokens }) }),
+  vaultRecover: (code: string) => request<VaultOpened>('/vault/recover', { method: 'POST', body: json({ code }) }),
+  vaultLoginOptions: <O>() => request<PasskeyOptions<O>>('/vault/passkey/login/options', { method: 'POST' }),
+  vaultLogin: (challengeId: string, response: unknown) =>
+    request<VaultOpened>('/vault/passkey/login', { method: 'POST', body: json({ challengeId, response }) }),
+  vault: () => request<VaultInfo>('/vault', { vault: true }),
+  vaultLink: (tokens: string[]) => request('/vault/rooms', { method: 'POST', body: json({ tokens }), vault: true }),
+  vaultUnlink: (roomId: string) => request(`/vault/rooms/${encodeURIComponent(roomId)}`, { method: 'DELETE', vault: true }),
+  vaultRegisterOptions: <O>() => request<PasskeyOptions<O>>('/vault/passkey/register/options', { method: 'POST', vault: true }),
+  vaultRegister: (challengeId: string, response: unknown) =>
+    request('/vault/passkey/register', { method: 'POST', body: json({ challengeId, response }), vault: true }),
+  vaultNewCode: () => request<{ recoveryCode: string }>('/vault/recovery-code', { method: 'POST', vault: true }),
+  vaultSignOut: () => request('/vault/signout', { method: 'POST', vault: true }),
+  vaultDelete: () => request('/vault', { method: 'DELETE', vault: true }),
 };

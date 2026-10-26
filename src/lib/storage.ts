@@ -31,3 +31,9 @@ export function forgetRoom(roomId: string) {
 }
 
 export const tokenFor = (roomId: string) => savedRooms().find((r) => r.roomId === roomId)?.token;
+
+const VAULT_KEY = 'splitsplash.vault.v1';
+
+export const vaultToken = (): string | null => localStorage.getItem(VAULT_KEY);
+export const setVaultToken = (token: string) => localStorage.setItem(VAULT_KEY, token);
+export const forgetVault = () => localStorage.removeItem(VAULT_KEY);
