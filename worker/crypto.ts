@@ -1,8 +1,8 @@
 const enc = new TextEncoder();
 
 const toHex = (buf: ArrayBuffer) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
-const toB64Url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const fromB64Url = (s: string) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+export const toB64Url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+export const fromB64Url = (s: string) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
 
 export async function sha256(input: string): Promise<string> {
   return toHex(await crypto.subtle.digest('SHA-256', enc.encode(input)));
@@ -35,3 +35,4 @@ export async function decrypt(blob: string, pepper: string): Promise<string> {
 
 export const passphraseHash = (normalized: string, pepper: string) => sha256(`passphrase:${pepper}:${normalized}`);
 export const tokenHash = (token: string) => sha256(`token:${token}`);
+export const recoveryHash = (normalized: string, pepper: string) => sha256(`recovery:${pepper}:${normalized}`);

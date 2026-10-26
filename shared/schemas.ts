@@ -52,3 +52,16 @@ export const expenseInput = z.object({
 export type CreateRoomInput = z.infer<typeof createRoomInput>;
 export type JoinInput = z.infer<typeof joinInput>;
 export type ExpenseInput = z.input<typeof expenseInput>;
+
+const memberTokens = z.array(z.string().min(20).max(100)).min(1).max(100);
+
+export const vaultCreateInput = z.object({ tokens: memberTokens });
+export const vaultLinkInput = z.object({ tokens: memberTokens });
+export const vaultRecoverInput = z.object({ code: z.string().min(1).max(200) });
+// WebAuthn JSON is checked in depth by @simplewebauthn/server; here we only bound its size and shape.
+export const passkeyVerifyInput = z.object({
+  challengeId: z.string().min(1).max(64),
+  response: z
+    .object({ id: z.string().min(1).max(1024), rawId: z.string().max(1024), type: z.literal('public-key'), response: z.record(z.string(), z.unknown()) })
+    .loose(),
+});

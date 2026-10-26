@@ -8,6 +8,7 @@ import { SplitError, splitExpense } from '../shared/split';
 import type { Activity, ActivityType, Expense, Member, Room, RoomState } from '../shared/types';
 import { decrypt, encrypt, newId, passphraseHash, tokenHash } from './crypto';
 import { body, fail, guardFailures, issueToken, pepper, rateLimit, recordFailure, type App } from './http';
+import { vault } from './vault';
 
 const app = new Hono<App>().basePath('/api');
 
@@ -418,6 +419,7 @@ room.get('/activity', async (c) => {
 });
 
 app.route('/room', room);
+app.route('/vault', vault);
 
 app.notFound((c) => c.json({ error: 'not_found' }, 404));
 app.onError((err, c) => {

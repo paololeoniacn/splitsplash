@@ -302,3 +302,14 @@ export function isPassphraseShape(input: string): boolean {
 export function isLegacyPassphrase(passphrase: string): boolean {
   return normalizePassphrase(passphrase).split('-').length - 1 < PASSPHRASE_WORD_COUNT;
 }
+
+export const RECOVERY_WORD_COUNT = 8;
+
+/** Personal keyring recovery code: eight animal/habitat words ≈ 64 bits (258⁸). Never stored, only hashed. */
+export function generateRecoveryCode(): string {
+  return Array.from({ length: RECOVERY_WORD_COUNT }, () => ALL_WORDS[randomInt(ALL_WORDS.length)]).join('-');
+}
+
+export function isRecoveryShape(input: string): boolean {
+  return new RegExp(`^([a-z]+-){${RECOVERY_WORD_COUNT - 1}}[a-z]+$`).test(normalizePassphrase(input));
+}

@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { computeBalances, simplifyDebts } from './balances';
 import { evaluateAmount, formatMoney, parseAmount } from './money';
-import { generatePassphrase, HABITAT_WORDS, isLegacyPassphrase, isPassphraseShape, normalizePassphrase, PASSPHRASE_WORDS } from './passphrase';
+import {
+  generatePassphrase,
+  generateRecoveryCode,
+  HABITAT_WORDS,
+  isRecoveryShape,
+  isLegacyPassphrase,
+  isPassphraseShape,
+  normalizePassphrase,
+  PASSPHRASE_WORDS,
+} from './passphrase';
 import { allocate, splitExpense } from './split';
 
 describe('evaluateAmount', () => {
@@ -158,5 +167,20 @@ describe('passphrase', () => {
   it('normalizes case, accents and separators', () => {
     expect(normalizePassphrase('  Volpe Koala.GUFO  0042 ')).toBe('volpe-koala-gufo-0042');
     expect(normalizePassphrase('colibrì-ape-orso-1234')).toBe('colibri-ape-orso-1234');
+  });
+});
+
+describe('recovery code', () => {
+  it('is eight words, never a room passphrase', () => {
+    const code = generateRecoveryCode();
+    expect(code.split('-')).toHaveLength(8);
+    expect(isRecoveryShape(code)).toBe(true);
+    expect(isPassphraseShape(code)).toBe(false);
+    expect(isRecoveryShape(generatePassphrase())).toBe(false);
+  });
+
+  it('accepts what people type back', () => {
+    expect(isRecoveryShape('Volpe Fiordo  gufo,koala tundra-PALUDE lince Orso')).toBe(true);
+    expect(isRecoveryShape('volpe fiordo gufo koala tundra palude lince')).toBe(false);
   });
 });
