@@ -21,7 +21,7 @@ con **D1** (SQLite, free tier) come database.
 
 ```
 src/         React + Vite + Tailwind 4 + TanStack Query + react-router + i18next
-worker/      API Hono (auth via token, rate limiting su join/creazione)
+worker/      API Hono (auth via token, rate limiting su join/creazione e scritture)
 shared/      logica pura condivisa: money, split, balances, passphrase, schemi zod (+ test)
 migrations/  schema D1
 ```
@@ -48,6 +48,7 @@ npm run deploy
 
 Il rate limiting su join/creazione usa i binding `ratelimits`: `JOIN_LIMITER` (10/min per IPv4 o IPv6 /64),
 `NETWORK_LIMITER` (30/min per /24 o /48) e `GLOBAL_LIMITER` (600/min in totale).
+`WRITE_LIMITER` limita le scritture a 30/min per room o portachiavi; in più massimo 500 scritture al giorno per room.
 
 ### GitHub Actions
 
@@ -61,11 +62,14 @@ e `CLOUDFLARE_ACCOUNT_ID`.
   Da menu si può generare una nuova passphrase (la vecchia smette di funzionare) e, volendo,
   disconnettere tutti gli altri dispositivi.
 - Passphrase: 5 parole tra animali e habitat + 4 cifre (es. `volpe-savana-gufo-laguna-riccio-0042`, ~53 bit), solo a–z/0–9/- quindi sicura negli URL. Quelle vecchie a 3 animali restano valide ma vengono segnalate.
-- Blocco brute-force: dopo 12 passphrase sbagliate in un'ora da un indirizzo (40 dalla stessa rete /48 o /24) il lookup viene rifiutato per il resto dell'ora (tabella `join_failures`, chiavi hashate).
+- Blocco brute-force: dopo 12 passphrase sbagliate in un'ora da un indirizzo (60 dalla stessa rete /48 o /24) il lookup viene rifiutato per il resto dell'ora (tabella `join_failures`, chiavi hashate).
 - Portachiavi: le passkey (WebAuthn, `@simplewebauthn/server`) valgono solo su `splitsplash.pages.dev`
   (e `localhost` in sviluppo): se cambia dominio vanno ricreate. Il codice di recupero (8 parole, ~64 bit)
   è salvato solo come hash con pepper ed è soggetto allo stesso blocco brute-force delle passphrase.
   Il recupero emette nuovi token per i membri collegati: chi ha il codice entra come te nelle tue room.
+  Per questo «Nuovo codice» disconnette anche i dispositivi entrati tramite portachiavi (tranne quello in uso),
+  le passkey si possono vedere e rimuovere, e la verifica utente (impronta/PIN) è obbligatoria.
+  Rigenerare la passphrase con «disconnetti gli altri» toglie la room da tutti i portachiavi.
 - I token dei dispositivi scadono dopo 90 giorni di inattività (portachiavi: 180). Limiti: 50 membri e 5000 spese per room.
 - Header di sicurezza: CSP, HSTS ecc. in `public/_headers`; `no-store`/`nosniff` sulle API.
   Dettagli in `SECURITY-REVIEW.md`.
