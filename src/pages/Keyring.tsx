@@ -13,7 +13,7 @@ import { Button, IconButton, TextInput } from '../components/ui';
 import { errorKey } from '../i18n';
 import { api, ApiError } from '../lib/api';
 import { forgetVault, savedRooms, vaultToken } from '../lib/storage';
-import { addPasskey, createVault, openWithCode, openWithPasskey, passkeySupported, syncLocalRooms } from '../lib/vault';
+import { addPasskey, createVault, linkRooms, newRecoveryCode, openWithCode, openWithPasskey, passkeySupported, restoreMissing } from '../lib/vault';
 
 const errText = (t: (k: string) => string, e: unknown) => (e ? t(errorKey(e instanceof ApiError ? e.code : 'generic')) : undefined);
 
@@ -179,26 +179,35 @@ function RecoveryCode({ code, skipped, onDone }: { code: string; skipped: boolea
 }
 
 function Manage({ onClosed, onNewCode }: { onClosed: () => void; onNewCode: (code: string) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
   const supported = passkeySupported();
-  const local = new Set(savedRooms().map((r) => r.roomId));
+  const [localRooms, setLocalRooms] = useState(savedRooms);
+  const local = new Set(localRooms.map((r) => r.roomId));
+  const date = (ms: number) => new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(ms);
 
-  const info = useQuery({
-    queryKey: ['vault'],
-    queryFn: async () => {
-      await syncLocalRooms().catch(() => {});
-      return api.vault();
-    },
-  });
+  const info = useQuery({ queryKey: ['vault'], queryFn: api.vault });
   const refresh = () => qc.invalidateQueries({ queryKey: ['vault'] });
 
   useEffect(() => {
     if (info.error instanceof ApiError && info.error.status === 401) onClosed();
   }, [info.error, onClosed]);
 
+  const rooms = info.data?.rooms ?? [];
+  const linked = new Set(rooms.map((r) => r.roomId));
+  const missing = rooms.filter((r) => !local.has(r.roomId)).map((r) => r.roomId);
+  const unlinked = info.data ? localRooms.filter((r) => !linked.has(r.roomId)) : [];
+
   const unlink = useMutation({ mutationFn: (roomId: string) => api.vaultUnlink(roomId), onSuccess: refresh });
+  const link = useMutation({ mutationFn: () => linkRooms(unlinked.map((r) => r.roomId)), onSuccess: refresh });
+  const restore = useMutation({
+    mutationFn: () => restoreMissing(missing),
+    onSuccess: (count) => {
+      setLocalRooms(savedRooms());
+      toast({ text: t('keys.restored', { count }) });
+    },
+  });
   const add = useMutation({
     mutationFn: addPasskey,
     onSuccess: () => {
@@ -206,14 +215,8 @@ function Manage({ onClosed, onNewCode }: { onClosed: () => void; onNewCode: (cod
       void refresh();
     },
   });
-  const restore = useMutation({
-    mutationFn: openWithPasskey,
-    onSuccess: (count) => {
-      toast({ text: t('keys.restored', { count }) });
-      void refresh();
-    },
-  });
-  const newCode = useMutation({ mutationFn: api.vaultNewCode, onSuccess: (r) => onNewCode(r.recoveryCode) });
+  const removeKey = useMutation({ mutationFn: (id: string) => api.vaultRemovePasskey(id), onSuccess: refresh });
+  const newCode = useMutation({ mutationFn: newRecoveryCode, onSuccess: (r) => onNewCode(r.recoveryCode) });
   const close = (text: string) => {
     forgetVault();
     qc.removeQueries({ queryKey: ['vault'] });
@@ -223,12 +226,12 @@ function Manage({ onClosed, onNewCode }: { onClosed: () => void; onNewCode: (cod
   const signOut = useMutation({ mutationFn: api.vaultSignOut, onSettled: () => close(t('keys.signedOut')) });
   const remove = useMutation({ mutationFn: api.vaultDelete, onSuccess: () => close(t('keys.deleted')) });
 
-  const rooms = info.data?.rooms ?? [];
-  const missing = rooms.some((r) => !local.has(r.roomId));
+  const passkeys = info.data?.passkeys ?? [];
 
   return (
     <FormShell title={t('keys.title')}>
-      <p className="-mt-4 mb-10 text-lg leading-relaxed text-ink-2">{t('keys.lede')}</p>
+      <p className="-mt-4 text-lg leading-relaxed text-ink-2">{t('keys.lede')}</p>
+      <p className="mt-3 mb-10 text-sm text-ink-2">{info.data ? t('keys.tag', { tag: info.data.tag }) : '\u00a0'}</p>
 
       <section aria-labelledby="keys-rooms" className="grid grid-cols-1 gap-3">
         <h2 id="keys-rooms" className="text-xl font-bold tracking-[-0.02em]">
@@ -269,29 +272,62 @@ function Manage({ onClosed, onNewCode }: { onClosed: () => void; onNewCode: (cod
             })}
           </ul>
         )}
-        {missing && supported && (
+        {missing.length > 0 && (
           <Button variant="secondary" loading={restore.isPending} onClick={() => restore.mutate()}>
-            <Fingerprint className="size-4" aria-hidden="true" />
-            {t('keys.restore')}
+            <RefreshCw className="size-4" aria-hidden="true" />
+            {t('keys.restore', { count: missing.length })}
           </Button>
         )}
-        <ErrorLine error={info.error ?? unlink.error ?? restore.error} />
+        {unlinked.length > 0 && (
+          <div className="mt-2 grid grid-cols-1 gap-3 rounded-note px-4 py-4 ring-1 ring-rule">
+            <p className="text-sm text-ink-2">{t('keys.unlinkedHere', { count: unlinked.length, rooms: unlinked.map((r) => r.name).join(', ') })}</p>
+            <Button variant="secondary" loading={link.isPending} onClick={() => link.mutate()}>
+              <KeyRound className="size-4" aria-hidden="true" />
+              {t('keys.linkHere', { count: unlinked.length })}
+            </Button>
+          </div>
+        )}
+        <ErrorLine error={info.error ?? unlink.error ?? restore.error ?? link.error} />
       </section>
 
       <section aria-labelledby="keys-passkeys" className="mt-12 grid grid-cols-1 gap-3 border-t border-rule pt-10">
         <h2 id="keys-passkeys" className="text-xl font-bold tracking-[-0.02em]">
           {t('keys.passkeysTitle')}
         </h2>
-        {info.data && <p className="text-ink-2">{info.data.passkeys ? t('keys.passkeysCount', { count: info.data.passkeys }) : t('keys.passkeysNone')}</p>}
+        {info.data &&
+          (passkeys.length ? (
+            <ul className="grid grid-cols-1 divide-y divide-rule border-y border-rule">
+              {passkeys.map((p) => (
+                <li key={p.id} className="flex items-center gap-3.5 py-3">
+                  <KeyRound className="size-5 shrink-0 text-ink-2" aria-hidden="true" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold">{p.label || t('keys.passkeyUnnamed')}</span>
+                    <span className="block truncate text-sm text-ink-2">
+                      {t('keys.passkeyDates', { created: date(p.createdAt), used: date(p.lastUsedAt) })}
+                    </span>
+                  </span>
+                  <IconButton
+                    label={t('keys.removePasskey', { name: p.label || t('keys.passkeyUnnamed') })}
+                    disabled={removeKey.isPending}
+                    onClick={() => confirm(t(passkeys.length === 1 ? 'keys.removeLastPasskeyConfirm' : 'keys.removePasskeyConfirm')) && removeKey.mutate(p.id)}
+                  >
+                    <X className="size-4 text-ink-2" aria-hidden="true" />
+                  </IconButton>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-ink-2">{t('keys.passkeysNone')}</p>
+          ))}
         {supported ? (
           <Button variant="secondary" loading={add.isPending} onClick={() => add.mutate()}>
-            <KeyRound className="size-4" aria-hidden="true" />
+            <Fingerprint className="size-4" aria-hidden="true" />
             {t('keys.addPasskey')}
           </Button>
         ) : (
           <p className="text-sm text-ink-2">{t('keys.unsupported')}</p>
         )}
-        <ErrorLine error={add.error} />
+        <ErrorLine error={add.error ?? removeKey.error} />
       </section>
 
       <section aria-labelledby="keys-safety" className="mt-12 grid grid-cols-1 justify-items-start gap-1 border-t border-rule pt-10">

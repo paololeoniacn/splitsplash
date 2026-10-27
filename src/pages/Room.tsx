@@ -17,6 +17,8 @@ import { Button, IconButton, TextInput } from '../components/ui';
 import { api, ApiError } from '../lib/api';
 import { useMoney } from '../lib/format';
 import { forgetRoom, tokenFor, touchRoom } from '../lib/storage';
+import { unlinkFromVault } from '../lib/vault';
+import { errorKey } from '../i18n';
 import { activityKey, roomKey, useExpenses, useRoom } from '../lib/useRoom';
 import { VersionFooter } from '../components/VersionFooter';
 import { isLegacyPassphrase } from '../../shared/passphrase';
@@ -217,7 +219,12 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
   const [animal, setAnimal] = useState('');
 
   useEffect(() => {
-    if (open) setView('main');
+    if (open) {
+      setView('main');
+      add.reset();
+      update.reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const refresh = () => {
@@ -235,7 +242,7 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
   };
   const leave = async () => {
     if (!confirm(t('menu.leaveConfirm'))) return;
-    await api.leave(roomId).catch(() => {});
+    await Promise.all([api.leave(roomId).catch(() => {}), unlinkFromVault(roomId)]);
     forgetRoom(roomId);
     navigate('/', { replace: true });
   };
@@ -285,6 +292,11 @@ function RoomMenu({ open, onClose, roomId, state }: { open: boolean; onClose: ()
             taken={view === 'add' ? taken : taken.filter((a) => a !== meMember.animal)}
             ink={view === 'add' ? state.members.length % 6 : meMember.ink}
           />
+          {(add.error || update.error) && (
+            <p role="alert" className="text-sm text-owe">
+              {t(errorKey(((add.error ?? update.error) as ApiError).code ?? 'generic'))}
+            </p>
+          )}
           <Button type="submit" size="lg" loading={add.isPending || update.isPending} disabled={!name.trim() || !animal}>
             {view === 'add' ? t('menu.add') : t('menu.save')}
           </Button>

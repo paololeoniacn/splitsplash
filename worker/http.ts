@@ -10,7 +10,10 @@ export type App = { Bindings: Env; Variables: { auth: Auth; vault: VaultAuth } }
 
 // Wrong secrets (passphrases, recovery codes) allowed per hour, per address and per wider network, before guesses are refused.
 const FAILURE_WINDOW_MS = 60 * 60 * 1000;
-const MAX_FAILURES = { host: 12, wide: 40 } as const;
+// The wider bucket is generous: mobile carriers put many unrelated people behind one IPv4 /24.
+const MAX_FAILURES = { host: 12, wide: 60 } as const;
+// Changes per room (or keyring) per day; far above any real group, low enough that one member can't exhaust the shared database.
+const MAX_DAILY_WRITES = 500;
 
 export const fail = (status: 400 | 401 | 403 | 404 | 409 | 429 | 500, code: string): never => {
   throw new HTTPException(status, { res: Response.json({ error: code }, { status }) });
@@ -37,15 +40,28 @@ export async function rateLimit(c: Context<App>) {
 
 export const pepper = (c: Context<App>) => c.env.PEPPER || fail(500, 'server_misconfigured');
 
-export async function issueToken(db: D1Database, memberId: string) {
+/** `vaultId` marks tokens minted by a keyring, so the keyring can revoke them later. */
+export async function issueToken(db: D1Database, memberId: string, vaultId: string | null = null) {
   const token = randomToken();
   const now = Date.now();
   return {
     token,
     stmt: db
-      .prepare('INSERT INTO member_tokens (token_hash, member_id, created_at, last_seen_at) VALUES (?, ?, ?, ?)')
-      .bind(await tokenHash(token), memberId, now, now),
+      .prepare('INSERT INTO member_tokens (token_hash, member_id, created_at, last_seen_at, vault_id) VALUES (?, ?, ?, ?, ?)')
+      .bind(await tokenHash(token), memberId, now, now, vaultId),
   };
+}
+
+/** Caps write bursts per room or keyring; for rooms also caps the day's total, counted from the activity log. */
+export async function limitWrites(c: Context<App>, scope: { roomId: string } | { vaultId: string }) {
+  const key = 'roomId' in scope ? `room:${scope.roomId}` : `vault:${scope.vaultId}`;
+  if (c.env.WRITE_LIMITER && !(await c.env.WRITE_LIMITER.limit({ key })).success) fail(429, 'rate_limited');
+  if ('roomId' in scope) {
+    const row = await c.env.DB.prepare('SELECT COUNT(*) AS n FROM activity WHERE room_id = ? AND created_at > ?')
+      .bind(scope.roomId, Date.now() - 24 * 60 * 60 * 1000)
+      .first<{ n: number }>();
+    if ((row?.n ?? 0) >= MAX_DAILY_WRITES) fail(429, 'too_many_writes');
+  }
 }
 
 type FailureKey = { key: string; bucket: number; max: number };

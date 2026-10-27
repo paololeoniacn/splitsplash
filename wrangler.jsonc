@@ -34,6 +34,12 @@
       "name": "GLOBAL_LIMITER",
       "namespace_id": "1003",
       "simple": { "limit": 600, "period": 60 }
+    },
+    {
+      // Writes per room (or keyring): one member can't burn the database's daily write quota for everyone
+      "name": "WRITE_LIMITER",
+      "namespace_id": "1004",
+      "simple": { "limit": 30, "period": 60 }
     }
   ],
   "observability": { "enabled": true }

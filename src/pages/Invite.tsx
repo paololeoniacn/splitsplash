@@ -13,6 +13,7 @@ import { api, ApiError } from '../lib/api';
 import { errorKey } from '../i18n';
 import { isLegacyPassphrase } from '../../shared/passphrase';
 import { tokenFor } from '../lib/storage';
+import { linkToVault } from '../lib/vault';
 import { roomKey, useRoom } from '../lib/useRoom';
 
 export default function Invite() {
@@ -42,6 +43,9 @@ export default function Invite() {
   const rotate = useMutation({
     mutationFn: () => api.rotatePassphrase(roomId, signOutOthers),
     onSuccess: () => {
+      // Signing others out also drops this room from every keyring, ours included: put it back.
+      const own = tokenFor(roomId);
+      if (signOutOthers && own) linkToVault(own);
       setMinted(true);
       setConfirming(false);
       setSignOutOthers(false);

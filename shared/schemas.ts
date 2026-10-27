@@ -57,6 +57,8 @@ const memberTokens = z.array(z.string().min(20).max(100)).min(1).max(100);
 
 export const vaultCreateInput = z.object({ tokens: memberTokens });
 export const vaultLinkInput = z.object({ tokens: memberTokens });
+export const vaultOpenInput = z.object({ roomIds: z.array(z.string().min(1).max(64)).min(1).max(200).optional() });
+export const vaultNewCodeInput = z.object({ keep: z.array(z.string().min(20).max(100)).max(100).default([]) });
 export const vaultRecoverInput = z.object({ code: z.string().min(1).max(200) });
 // WebAuthn JSON is checked in depth by @simplewebauthn/server; here we only bound its size and shape.
 export const passkeyVerifyInput = z.object({

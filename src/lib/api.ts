@@ -52,8 +52,9 @@ export interface VaultOpened {
 }
 
 export interface VaultInfo {
+  tag: string;
   rooms: { roomId: string; roomName: string; member: { name: string; animal: string; ink: number } }[];
-  passkeys: number;
+  passkeys: { id: string; label: string; createdAt: number; lastUsedAt: number }[];
   createdAt: number;
 }
 
@@ -91,11 +92,13 @@ export const api = {
     request<VaultOpened>('/vault/passkey/login', { method: 'POST', body: json({ challengeId, response }) }),
   vault: () => request<VaultInfo>('/vault', { vault: true }),
   vaultLink: (tokens: string[]) => request('/vault/rooms', { method: 'POST', body: json({ tokens }), vault: true }),
+  vaultOpen: (roomIds: string[]) => request<Pick<VaultOpened, 'rooms'>>('/vault/open', { method: 'POST', body: json({ roomIds }), vault: true }),
   vaultUnlink: (roomId: string) => request(`/vault/rooms/${encodeURIComponent(roomId)}`, { method: 'DELETE', vault: true }),
   vaultRegisterOptions: <O>() => request<PasskeyOptions<O>>('/vault/passkey/register/options', { method: 'POST', vault: true }),
   vaultRegister: (challengeId: string, response: unknown) =>
     request('/vault/passkey/register', { method: 'POST', body: json({ challengeId, response }), vault: true }),
-  vaultNewCode: () => request<{ recoveryCode: string }>('/vault/recovery-code', { method: 'POST', vault: true }),
+  vaultRemovePasskey: (id: string) => request(`/vault/passkeys/${encodeURIComponent(id)}`, { method: 'DELETE', vault: true }),
+  vaultNewCode: (keep: string[]) => request<{ recoveryCode: string }>('/vault/recovery-code', { method: 'POST', body: json({ keep }), vault: true }),
   vaultSignOut: () => request('/vault/signout', { method: 'POST', vault: true }),
   vaultDelete: () => request('/vault', { method: 'DELETE', vault: true }),
 };

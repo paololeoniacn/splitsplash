@@ -7,7 +7,7 @@ import { createRoomInput, expenseInput, joinInput, lookupInput, memberInput, rot
 import { SplitError, splitExpense } from '../shared/split';
 import type { Activity, ActivityType, Expense, Member, Room, RoomState } from '../shared/types';
 import { decrypt, encrypt, newId, passphraseHash, tokenHash } from './crypto';
-import { body, fail, guardFailures, issueToken, pepper, rateLimit, recordFailure, type App } from './http';
+import { body, fail, guardFailures, issueToken, limitWrites, pepper, rateLimit, recordFailure, type App } from './http';
 import { vault } from './vault';
 
 const app = new Hono<App>().basePath('/api');
@@ -143,6 +143,7 @@ room.use(async (c, next) => {
   if (Date.now() - row!.last_seen_at > 60 * 60 * 1000) {
     c.executionCtx.waitUntil(c.env.DB.prepare('UPDATE member_tokens SET last_seen_at = ? WHERE token_hash = ?').bind(Date.now(), hash).run());
   }
+  if (c.req.method !== 'GET' && !c.req.path.endsWith('/leave')) await limitWrites(c, { roomId: row!.room_id });
   await next();
 });
 
@@ -173,8 +174,12 @@ room.post('/passphrase', async (c) => {
     db
       .prepare('UPDATE rooms SET passphrase_hash = ?, passphrase_enc = ? WHERE id = ?')
       .bind(await passphraseHash(passphrase, pepper(c)), await encrypt(passphrase, pepper(c)), roomId),
+    // Keyrings could mint fresh tokens for this room, so they lose it too; the caller's device re-links its own.
     ...(signOutOthers
-      ? [db.prepare('DELETE FROM member_tokens WHERE token_hash != ? AND member_id IN (SELECT id FROM members WHERE room_id = ?)').bind(own, roomId)]
+      ? [
+          db.prepare('DELETE FROM member_tokens WHERE token_hash != ? AND member_id IN (SELECT id FROM members WHERE room_id = ?)').bind(own, roomId),
+          db.prepare('DELETE FROM vault_members WHERE member_id IN (SELECT id FROM members WHERE room_id = ?)').bind(roomId),
+        ]
       : []),
     await logActivity(db, roomId, memberId, 'passphrase_rotated', { signedOutOthers: signOutOthers }),
   ]);

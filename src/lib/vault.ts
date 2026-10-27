@@ -13,20 +13,41 @@ function passkeyError(e: unknown): never {
   throw new ApiError(0, 'passkey_invalid');
 }
 
-/** Puts every room the keyring returned on this device and remembers the keyring. */
-async function restore(opened: VaultOpened) {
-  setVaultToken(opened.vaultToken);
+/** Puts the rooms the keyring returned on this device (keeping ones already here). */
+function store(rooms: VaultOpened['rooms']) {
   const local = new Set(savedRooms().map((r) => r.roomId));
-  for (const r of opened.rooms) if (!local.has(r.roomId)) saveRoom(r);
-  await syncLocalRooms();
-  return opened.rooms.length;
+  for (const r of rooms) if (!local.has(r.roomId)) saveRoom(r);
+  return rooms.length;
 }
 
-/** Links every room on this device to the active keyring. */
-export async function syncLocalRooms() {
-  const tokens = savedRooms().map((r) => r.token);
+const restore = (opened: VaultOpened) => (setVaultToken(opened.vaultToken), store(opened.rooms));
+
+/** Adds the given rooms on this device to the active keyring. Never automatic: unlinked rooms stay unlinked. */
+export async function linkRooms(roomIds: string[]) {
+  const wanted = new Set(roomIds);
+  const tokens = savedRooms()
+    .filter((r) => wanted.has(r.roomId))
+    .map((r) => r.token);
   if (vaultToken() && tokens.length) await api.vaultLink(tokens.slice(0, 100));
 }
+
+/** Brings linked rooms that are missing here back onto this device. */
+export async function restoreMissing(roomIds: string[]) {
+  return store((await api.vaultOpen(roomIds)).rooms);
+}
+
+/** Fire-and-forget when leaving a room on this device, so the keyring doesn't bring it back. */
+export function unlinkFromVault(roomId: string) {
+  if (vaultToken()) return api.vaultUnlink(roomId).catch(() => {});
+}
+
+/** Starts over with a new recovery code, signing out every other device that entered through the keyring. */
+export const newRecoveryCode = () =>
+  api.vaultNewCode(
+    savedRooms()
+      .map((r) => r.token)
+      .slice(0, 100),
+  );
 
 /** Fire-and-forget after creating or joining a room. */
 export function linkToVault(token: string) {

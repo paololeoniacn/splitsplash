@@ -8,9 +8,9 @@ import {
 } from '@simplewebauthn/server';
 import { Hono, type Context } from 'hono';
 import { generateRecoveryCode, isRecoveryShape, normalizePassphrase } from '../shared/passphrase';
-import { passkeyVerifyInput, vaultCreateInput, vaultLinkInput, vaultRecoverInput } from '../shared/schemas';
-import { fromB64Url, newId, randomToken, recoveryHash, tokenHash, toB64Url } from './crypto';
-import { body, fail, guardFailures, issueToken, pepper, rateLimit, recordFailure, type App } from './http';
+import { passkeyVerifyInput, vaultCreateInput, vaultLinkInput, vaultNewCodeInput, vaultOpenInput, vaultRecoverInput } from '../shared/schemas';
+import { fromB64Url, newId, randomToken, recoveryHash, sha256, tokenHash, toB64Url } from './crypto';
+import { body, fail, guardFailures, issueToken, limitWrites, pepper, rateLimit, recordFailure, type App } from './http';
 
 const MAX_VAULT_MEMBERS = 200;
 const MAX_PASSKEYS = 10;
@@ -56,6 +56,30 @@ async function takeChallenge(db: D1Database, id: string, vaultId: string | null)
   return row!;
 }
 
+/** Short public tag, shown in the app and in the password manager, to tell keyrings apart. */
+const vaultTag = async (vaultId: string) => (await sha256(`tag:${vaultId}`)).slice(0, 4).toUpperCase();
+
+/** "iPhone · Safari": where a passkey was created, so the list of passkeys is readable. */
+function deviceLabel(ua: string) {
+  const device = [
+    [/iPhone/, 'iPhone'],
+    [/iPad/, 'iPad'],
+    [/Android/, 'Android'],
+    [/CrOS/, 'ChromeOS'],
+    [/Mac OS X|Macintosh/, 'Mac'],
+    [/Windows/, 'Windows'],
+    [/Linux/, 'Linux'],
+  ].find(([re]) => (re as RegExp).test(ua))?.[1];
+  const browser = [
+    [/Edg\//, 'Edge'],
+    [/SamsungBrowser/, 'Samsung Internet'],
+    [/Firefox\/|FxiOS/, 'Firefox'],
+    [/Chrome\/|CriOS/, 'Chrome'],
+    [/Safari\//, 'Safari'],
+  ].find(([re]) => (re as RegExp).test(ua))?.[1];
+  return [device, browser].filter(Boolean).join(' · ').slice(0, 60);
+}
+
 async function issueVaultToken(db: D1Database, vaultId: string) {
   const token = randomToken();
   const now = Date.now();
@@ -84,16 +108,23 @@ async function link(db: D1Database, vaultId: string, memberIds: string[]) {
     );
 }
 
-/** Signs this device into the keyring and into every linked room. */
-async function open(db: D1Database, vaultId: string) {
+/** Mints device tokens for the linked rooms (all, or only `roomIds`). */
+async function roomTokens(db: D1Database, vaultId: string, roomIds?: string[]) {
   const { results } = await db
     .prepare('SELECT m.id, m.room_id, r.name FROM vault_members v JOIN members m ON m.id = v.member_id JOIN rooms r ON r.id = m.room_id WHERE v.vault_id = ?')
     .bind(vaultId)
     .all<{ id: string; room_id: string; name: string }>();
-  const issued = await Promise.all(results.map(async (m) => ({ m, ...(await issueToken(db, m.id)) })));
+  const wanted = roomIds ? new Set(roomIds) : null;
+  const issued = await Promise.all(results.filter((m) => !wanted || wanted.has(m.room_id)).map(async (m) => ({ m, ...(await issueToken(db, m.id, vaultId)) })));
+  return { stmts: issued.map((i) => i.stmt), rooms: issued.map(({ m, token }) => ({ roomId: m.room_id, name: m.name, token })) };
+}
+
+/** Signs this device into the keyring and into every linked room. */
+async function open(db: D1Database, vaultId: string) {
+  const { stmts, rooms } = await roomTokens(db, vaultId);
   const vt = await issueVaultToken(db, vaultId);
-  await db.batch([vt.stmt, ...issued.map((i) => i.stmt)]);
-  return { vaultToken: vt.token, rooms: issued.map(({ m, token }) => ({ roomId: m.room_id, name: m.name, token })) };
+  await db.batch([vt.stmt, ...stmts]);
+  return { vaultToken: vt.token, rooms };
 }
 
 // ---------- public ----------
@@ -136,7 +167,7 @@ vault.post('/recover', async (c) => {
 vault.post('/passkey/login/options', async (c) => {
   await rateLimit(c);
   const rp = relyingParty(c);
-  const options = await generateAuthenticationOptions({ rpID: rp.rpID, userVerification: 'preferred' });
+  const options = await generateAuthenticationOptions({ rpID: rp.rpID, userVerification: 'required' });
   return c.json({ challengeId: await newChallenge(c.env.DB, options.challenge, rp, null), options });
 });
 
@@ -188,6 +219,7 @@ authed.use(async (c, next) => {
   if (Date.now() - row!.last_seen_at > 60 * 60 * 1000) {
     c.executionCtx.waitUntil(c.env.DB.prepare('UPDATE vault_tokens SET last_seen_at = ? WHERE token_hash = ?').bind(Date.now(), hash).run());
   }
+  if (c.req.method !== 'GET') await limitWrites(c, { vaultId: row!.vault_id });
   await next();
 });
 
@@ -201,13 +233,15 @@ authed.get('/', async (c) => {
          JOIN members m ON m.id = v.member_id JOIN rooms r ON r.id = m.room_id WHERE v.vault_id = ? ORDER BY v.created_at DESC`,
       )
       .bind(vaultId),
-    db.prepare('SELECT COUNT(*) AS n FROM passkeys WHERE vault_id = ?').bind(vaultId),
+    db.prepare('SELECT credential_id, label, created_at, last_used_at FROM passkeys WHERE vault_id = ? ORDER BY created_at').bind(vaultId),
     db.prepare('SELECT created_at FROM vaults WHERE id = ?').bind(vaultId),
   ]);
   const r = rooms.results as { room_id: string; room_name: string; name: string; animal: string; ink: number }[];
+  const k = keys.results as { credential_id: string; label: string; created_at: number; last_used_at: number }[];
   return c.json({
+    tag: await vaultTag(vaultId),
     rooms: r.map((x) => ({ roomId: x.room_id, roomName: x.room_name, member: { name: x.name, animal: x.animal, ink: x.ink } })),
-    passkeys: (keys.results[0] as { n: number }).n,
+    passkeys: k.map((p) => ({ id: p.credential_id, label: p.label, createdAt: p.created_at, lastUsedAt: p.last_used_at })),
     createdAt: (v.results[0] as { created_at: number }).created_at,
   });
 });
@@ -217,6 +251,15 @@ authed.post('/rooms', async (c) => {
   const db = c.env.DB;
   await link(db, c.get('vault').vaultId, await membersForTokens(db, tokens));
   return c.json({ ok: true });
+});
+
+/** Brings linked rooms back onto this device without a new passkey prompt. */
+authed.post('/open', async (c) => {
+  const { roomIds } = await body(c, vaultOpenInput);
+  const db = c.env.DB;
+  const { stmts, rooms } = await roomTokens(db, c.get('vault').vaultId, roomIds);
+  if (stmts.length) await db.batch(stmts);
+  return c.json({ rooms });
 });
 
 authed.delete('/rooms/:roomId', async (c) => {
@@ -235,15 +278,17 @@ authed.post('/passkey/register/options', async (c) => {
     .bind(vaultId)
     .all<{ credential_id: string; transports: string }>();
   if (results.length >= MAX_PASSKEYS) fail(409, 'too_many_passkeys');
+  const name = `SplitSplash · ${await vaultTag(vaultId)}`;
   const options = await generateRegistrationOptions({
     rpName: 'SplitSplash',
     rpID: rp.rpID,
     userID: new Uint8Array(new TextEncoder().encode(vaultId)),
-    userName: 'SplitSplash',
-    userDisplayName: 'SplitSplash',
+    userName: name,
+    userDisplayName: name,
     attestationType: 'none',
     excludeCredentials: results.map((p) => ({ id: p.credential_id, transports: JSON.parse(p.transports) })),
-    authenticatorSelection: { residentKey: 'required', userVerification: 'preferred' },
+    // The keyring opens every linked room, so a bare touch isn't enough: require the device's PIN, face or fingerprint.
+    authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
   });
   return c.json({ challengeId: await newChallenge(db, options.challenge, rp, vaultId), options });
 });
@@ -260,7 +305,6 @@ authed.post('/passkey/register', async (c) => {
       expectedChallenge: ch.challenge,
       expectedOrigin: ch.origin,
       expectedRPID: ch.rp_id,
-      requireUserVerification: false,
     });
     if (!v.verified) throw new Error('not verified');
     cred = v.registrationInfo.credential;
@@ -269,17 +313,45 @@ authed.post('/passkey/register', async (c) => {
   }
   const now = Date.now();
   await db
-    .prepare('INSERT OR IGNORE INTO passkeys (credential_id, vault_id, public_key, counter, transports, created_at, last_used_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .bind(cred.id, vaultId, toB64Url(cred.publicKey), cred.counter, JSON.stringify(cred.transports ?? []), now, now)
+    .prepare(
+      'INSERT OR IGNORE INTO passkeys (credential_id, vault_id, public_key, counter, transports, created_at, last_used_at, label) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    )
+    .bind(
+      cred.id,
+      vaultId,
+      toB64Url(cred.publicKey),
+      cred.counter,
+      JSON.stringify(cred.transports ?? []),
+      now,
+      now,
+      deviceLabel(c.req.header('user-agent') ?? ''),
+    )
     .run();
   return c.json({ ok: true }, 201);
 });
 
+authed.delete('/passkeys/:id', async (c) => {
+  await c.env.DB.prepare('DELETE FROM passkeys WHERE credential_id = ? AND vault_id = ?').bind(c.req.param('id'), c.get('vault').vaultId).run();
+  return c.json({ ok: true });
+});
+
+/**
+ * For a leaked code: replaces it and signs out every other device that entered through this keyring,
+ * both from the keyring and from the rooms it opened. Tokens in `keep` (this device's rooms) survive.
+ */
 authed.post('/recovery-code', async (c) => {
+  const { keep } = await body(c, vaultNewCodeInput);
+  const { vaultId, tokenHash: own } = c.get('vault');
+  const db = c.env.DB;
+  const kept = await Promise.all(keep.map(tokenHash));
   const recoveryCode = generateRecoveryCode();
-  await c.env.DB.prepare('UPDATE vaults SET recovery_hash = ? WHERE id = ?')
-    .bind(await recoveryHash(recoveryCode, pepper(c)), c.get('vault').vaultId)
-    .run();
+  await db.batch([
+    db.prepare('UPDATE vaults SET recovery_hash = ? WHERE id = ?').bind(await recoveryHash(recoveryCode, pepper(c)), vaultId),
+    db.prepare('DELETE FROM vault_tokens WHERE vault_id = ? AND token_hash != ?').bind(vaultId, own),
+    db
+      .prepare(`DELETE FROM member_tokens WHERE vault_id = ?${kept.length ? ` AND token_hash NOT IN (${kept.map(() => '?').join(', ')})` : ''}`)
+      .bind(vaultId, ...kept),
+  ]);
   return c.json({ recoveryCode });
 });
 
