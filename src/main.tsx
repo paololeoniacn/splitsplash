@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import { registerSW } from 'virtual:pwa-register';
 import { ApiError } from './lib/api';
 import { ToastProvider } from './components/Toast';
+import { Crash } from './components/Crash';
 import './i18n';
 import './index.css';
 import CreateRoom from './pages/CreateRoom';
@@ -19,26 +20,33 @@ const queryClient = new QueryClient({
       staleTime: 5_000,
       retry: (count, err) => !(err instanceof ApiError && err.status >= 400 && err.status < 500) && count < 2,
     },
+    // Fail fast offline so the "you're offline" message shows instead of a silently paused mutation.
+    mutations: { networkMode: 'always' },
   },
 });
 
 const router = createBrowserRouter([
-  { path: '/', element: <Landing /> },
-  { path: '/new', element: <CreateRoom /> },
-  { path: '/join', element: <Join /> },
-  { path: '/j', element: <Join /> },
-  { path: '/keys', lazy: () => import('./pages/Keyring').then((m) => ({ Component: m.default })) },
-  { path: '/r/:roomId/invite', lazy: () => import('./pages/Invite').then((m) => ({ Component: m.default })) },
   {
-    path: '/r/:roomId',
-    element: <Room />,
+    errorElement: <Crash />,
     children: [
-      { index: true, element: <ExpensesTab /> },
-      { path: 'balances', element: <BalancesTab /> },
-      { path: 'activity', element: <ActivityTab /> },
+      { path: '/', element: <Landing /> },
+      { path: '/new', element: <CreateRoom /> },
+      { path: '/join', element: <Join /> },
+      { path: '/j', element: <Join /> },
+      { path: '/keys', lazy: () => import('./pages/Keyring').then((m) => ({ Component: m.default })) },
+      { path: '/r/:roomId/invite', lazy: () => import('./pages/Invite').then((m) => ({ Component: m.default })) },
+      {
+        path: '/r/:roomId',
+        element: <Room />,
+        children: [
+          { index: true, element: <ExpensesTab /> },
+          { path: 'balances', element: <BalancesTab /> },
+          { path: 'activity', element: <ActivityTab /> },
+        ],
+      },
+      { path: '*', element: <RedirectHome /> },
     ],
   },
-  { path: '*', element: <RedirectHome /> },
 ]);
 
 registerSW({ immediate: true });

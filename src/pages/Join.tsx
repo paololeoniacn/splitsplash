@@ -14,12 +14,20 @@ import { saveRoom } from '../lib/storage';
 import { linkToVault } from '../lib/vault';
 import { ANIMALS, INK_COUNT } from '../../shared/animals';
 
+const fromHash = () => {
+  try {
+    return decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return location.hash.slice(1);
+  }
+};
+
 const errText = (t: (k: string) => string, e: unknown) => (e ? t(errorKey(e instanceof ApiError ? e.code : 'generic')) : undefined);
 
 export default function Join() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [passphrase, setPassphrase] = useState(() => decodeURIComponent(location.hash.slice(1)));
+  const [passphrase, setPassphrase] = useState(fromHash);
   const [found, setFound] = useState<LookupResult | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [name, setName] = useState('');
