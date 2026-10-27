@@ -16,7 +16,8 @@ export function formatMoney(minor: number, currency: string, locale?: string, op
 /**
  * Parses user input like "12", "12,5", "1.234,56", "1,234.56" into minor units.
  * With both separators the last one is decimal; a single separator followed by
- * exactly three digits is read as a thousands separator.
+ * exactly three digits is read as a thousands separator, unless nothing but zeros
+ * precede it ("0,500" is not five hundred: it is rejected as too many decimals).
  */
 export function parseAmount(input: string, currency: string): number | null {
   const digits = currencyDigits(currency);
@@ -35,7 +36,7 @@ export function parseAmount(input: string, currency: string): number | null {
     if (kinds.size === 2) {
       if (seps.filter((c) => c === s[last]).length !== 1) return null;
       decimalAt = last;
-    } else if (seps.length === 1 && !(tailLen === 3 && digits !== 3)) decimalAt = last;
+    } else if (seps.length === 1 && !(tailLen === 3 && digits !== 3 && /[1-9]/.test(s.slice(0, last)))) decimalAt = last;
   }
   const intPart = (decimalAt >= 0 ? s.slice(0, decimalAt) : s).replace(/[.,]/g, '');
   const fracPart = decimalAt >= 0 ? s.slice(decimalAt + 1) : '';
@@ -45,11 +46,19 @@ export function parseAmount(input: string, currency: string): number | null {
   return Number.isSafeInteger(value) ? value : null;
 }
 
+/** True when a separator is read as thousands ("1.005" → 1005), so the UI can show how the amount was understood. */
+export function hasThousandsReading(input: string): boolean {
+  return /\d[.,]\d{3}(?![\d])/.test(input);
+}
+
+// Currency symbols and codes ("12€", "EUR 3") are dropped before doing arithmetic.
+const stripSymbols = (input: string) => input.replace(/\p{Sc}/gu, '').replace(new RegExp(`\\b(${CURRENCIES.join('|')})\\b`, 'gi'), '');
+
 const OPERATORS: Record<string, '+' | '-' | '*' | '/'> = { '+': '+', '-': '-', '−': '-', '*': '*', '×': '*', x: '*', X: '*', '/': '/', '÷': '/', ':': '/' };
 
 /** True when the input contains arithmetic beyond a single amount. */
 export function isExpression(input: string): boolean {
-  return /\d\s*[+\-−*×xX/÷:]/.test(input);
+  return /\d\s*[+\-−*×xX/÷:]/.test(stripSymbols(input));
 }
 
 /**
@@ -60,7 +69,7 @@ export function isExpression(input: string): boolean {
 export function evaluateAmount(input: string, currency: string): number | null {
   if (!isExpression(input)) return parseAmount(input, currency);
   const digits = currencyDigits(currency);
-  const parts = input
+  const parts = stripSymbols(input)
     .trim()
     .replace(/[+\-−*×xX/÷:\s]+$/, '')
     .split(/([+\-−*×xX/÷:])/);

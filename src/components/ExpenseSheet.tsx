@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CATEGORIES, type Category } from '../../shared/categories';
-import { evaluateAmount, isExpression, parseAmount, toInputString } from '../../shared/money';
+import { evaluateAmount, hasThousandsReading, isExpression, parseAmount, toInputString } from '../../shared/money';
 import { splitExpense, type SplitEntry, type SplitMode } from '../../shared/split';
 import type { Expense, Member } from '../../shared/types';
 import { errorKey } from '../i18n';
@@ -317,7 +317,7 @@ export function ExpenseSheet({
             >
               =
             </button>
-            {isExpression(amountStr) && (
+            {(isExpression(amountStr) || hasThousandsReading(amountStr)) && (
               <output htmlFor="amount" aria-live="polite" className={`num ml-auto truncate pl-2 text-lg font-bold ${amount ? 'text-ink' : 'text-owe'}`}>
                 {amount ? `= ${money(amount)}` : t('expense.calc.invalid')}
               </output>

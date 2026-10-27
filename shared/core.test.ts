@@ -22,6 +22,8 @@ describe('evaluateAmount', () => {
     ['1.234,56 + 0,44', 123500],
     ['45,90 + ', 4590],
     ['20', 2000],
+    ['12€ + 3', 1500],
+    ['EUR 10 x 2', 2000],
   ])('%s → %i', (input, expected) => expect(evaluateAmount(input, 'EUR')).toBe(expected));
 
   it.each(['5 - 10', '10 / 0', '3 + abc'])('rejects %s', (input) => expect(evaluateAmount(input, 'EUR')).toBeNull());
@@ -39,7 +41,7 @@ describe('parseAmount', () => {
     ['0,01', 1],
   ])('%s → %i', (input, expected) => expect(parseAmount(input, 'EUR')).toBe(expected));
 
-  it.each(['', 'abc', '-5', '1,234,5.6.7', '1,999'.replace('999', '9999')])('rejects %s', (input) => {
+  it.each(['', 'abc', '-5', '0,500', '0.500', ',500', '1,234,5.6.7', '1,999'.replace('999', '9999')])('rejects %s', (input) => {
     expect(parseAmount(input, 'EUR')).toBeNull();
   });
 
