@@ -87,7 +87,7 @@ export function ExpensesTab() {
                           {to && <MiniPortrait animal={to.animal} ink={to.ink} size={22} />}
                           <span className="truncate">{to?.id === state.me ? t('room.youShort') : to?.name}</span>
                         </span>
-                        <span className="block truncate text-sm text-ink-2">{e.note || t('room.transfer')}</span>
+                        <span className="line-clamp-2 text-sm leading-snug break-words text-ink-2">{e.note || t('room.transfer')}</span>
                       </span>
                       <span className="num shrink-0 font-semibold text-ink-2">{money(e.amount)}</span>
                     </button>
@@ -104,7 +104,7 @@ export function ExpensesTab() {
                       </span>
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold">{e.title}</span>
+                      <span className="line-clamp-2 font-semibold leading-snug break-words">{e.title}</span>
                       <span className="block truncate text-sm text-ink-2">
                         {payer?.id === state.me ? t('room.youPaid') : t('room.paidBy', { name: payer?.name ?? '?' })}
                         {e.note ? ` · ${e.note}` : ''}
